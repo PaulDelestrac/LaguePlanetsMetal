@@ -1,15 +1,15 @@
 ///// Copyright (c) 2023 Kodeco Inc.
-/// 
+///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-/// 
+///
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-/// 
+///
 /// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
 /// distribute, sublicense, create a derivative work, and/or sell copies of the
 /// Software in any work that is designed, intended, or marketed for pedagogical or
@@ -17,7 +17,7 @@
 /// or information technology.  Permission for such use, copying, modification,
 /// merger, publication, distribution, sublicensing, creation of derivative works,
 /// or sale is expressly withheld.
-/// 
+///
 /// This project and source code may use libraries or frameworks that are
 /// released under various Open-Source licenses. Use of those libraries and
 /// frameworks are governed by their own individual licenses.
@@ -33,34 +33,41 @@
 import MetalKit
 
 class GameController: NSObject {
-  var scene: GameScene
-  var renderer: Renderer
-//  var options = Options()
-  var fps: Double = 0
-  var deltaTime: Double = 0
-  var lastTime: Double = CFAbsoluteTimeGetCurrent()
-
-  init(metalView: MTKView) {
-    renderer = Renderer(metalView: metalView)
-    scene = GameScene()
-    super.init()
-    metalView.delegate = self
-    fps = Double(metalView.preferredFramesPerSecond)
-    mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
-  }
+    var scene: GameScene
+    var renderer: Renderer
+    var options: Options
+    var fps: Double = 0
+    var deltaTime: Double = 0
+    var lastTime: Double = CFAbsoluteTimeGetCurrent()
+    var isEditing: Bool
+    
+    init(metalView: MTKView, options: Options, isEditing: Bool = false) {
+        renderer = Renderer(metalView: metalView)
+        scene = GameScene()
+        self.options = options
+        self.isEditing = isEditing
+        super.init()
+        metalView.delegate = self
+        fps = Double(metalView.preferredFramesPerSecond)
+        mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
+    }
 }
 
 extension GameController: MTKViewDelegate {
-  func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-    scene.update(size: size)
-    renderer.mtkView(view, drawableSizeWillChange: size)
-  }
-
-  func draw(in view: MTKView) {
-    let currentTime = CFAbsoluteTimeGetCurrent()
-    let deltaTime = (currentTime - lastTime)
-    lastTime = currentTime
-    scene.update(deltaTime: Float(deltaTime))
-    renderer.draw(scene: scene, in: view)
-  }
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        if !isEditing {
+            scene.update(size: size)
+        }
+        renderer.mtkView(view, drawableSizeWillChange: size)
+    }
+    
+    func draw(in view: MTKView) {
+        let currentTime = CFAbsoluteTimeGetCurrent()
+        let deltaTime = (currentTime - lastTime)
+        lastTime = currentTime
+        if !isEditing {
+            scene.update(deltaTime: Float(deltaTime))
+        }
+        renderer.draw(scene: scene, in: view, options: options)
+    }
 }

@@ -9,19 +9,20 @@ import Foundation
 import MetalKit
 
 class Planet : Transformable {
+    let device: MTLDevice
     var transform = Transform()
-    var terrainFaces: [TerrainFace]
-    var rawMesh: RawMesh
+    var terrainFaces: [TerrainFace] = []
+    var rawMesh: RawMesh = RawMesh(vertices: [], indices: [])
     let resolution: Int = 10
     var tiling: UInt32 = 1
     
     var colors: [SIMD4<Float>] = []
     var normals: [SIMD3<Float>] = []
     
-    let vertexBuffer: MTLBuffer
-    let indexBuffer: MTLBuffer
-    let colorBuffer: MTLBuffer
-    let normalBuffer: MTLBuffer
+    var vertexBuffer: MTLBuffer!
+    var indexBuffer: MTLBuffer!
+    var colorBuffer: MTLBuffer!
+    var normalBuffer: MTLBuffer!
     
     let directions: [SIMD3<Float>] = [
         SIMD3<Float>(1, 0, 0),  // Right
@@ -32,42 +33,19 @@ class Planet : Transformable {
         SIMD3<Float>(0, 0, -1)  // Back
     ]
     
-    init(device: MTLDevice, scale: Float = 1) {
-        self.terrainFaces = []
-        
-        // Create the terrain faces
-        for i in 0..<directions.count {
-            self.terrainFaces.append(TerrainFace(resolution: self.resolution, localUp: directions[i]))
-        }
-        
-        // Generate the mesh for each face
-        self.rawMesh = RawMesh(vertices: [], indices: [])
-        for terrainFace in self.terrainFaces {
-            terrainFace.construct_mesh()
-            let numberOfIndices = self.rawMesh.vertices.count
-            let shiftedIndices = terrainFace.mesh.indices.map { UInt16(numberOfIndices) + $0 }
-            self.rawMesh.indices.append(contentsOf: shiftedIndices)
-            self.rawMesh.vertices.append(contentsOf: terrainFace.mesh.vertices)
-            self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
-        }
-        
-        // Scale the meshes
-        self.rawMesh.vertices = self.rawMesh.vertices.map {
-            float3(x: $0.x * scale, y: $0.y * scale, z: $0.z * scale)
-        }
+    init(device: MTLDevice, scale: Float = 1, color: float3 = float3(0, 0, 0)) {
+        self.device = device
+        self.generateMesh(radius: scale)
         
         // Initialize random colors
         for _ in self.rawMesh.vertices {
-            // Random colors
-            //self.colors.append(SIMD4<Float>(Float.random(in: 0...1), Float.random(in: 0...1), Float.random(in: 0...1), 1))
-            // Green
-            //self.colors.append(SIMD4<Float>(0, 1, 0, 1))
-            // Grey
-            self.colors.append(SIMD4<Float>(0.8, 0.8, 0.8, 1))
+            // if no color is provided, set random colors
+            if color == float3(0, 0, 0) {
+                self.colors.append(SIMD4<Float>(Float.random(in: 0...1), Float.random(in: 0...1), Float.random(in: 0...1), 1))
+            } else {
+                self.colors.append(SIMD4<Float>(color, 1))
+            }
         }
-        
-        // Calculate normals
-        self.normals = self.rawMesh.normals//calculateVertexNormals(vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
         
         // Vertex buffer
         guard let vertexBuffer = device.makeBuffer(bytes: &self.rawMesh.vertices, length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: []) else {
@@ -92,6 +70,57 @@ class Planet : Transformable {
             fatalError("Unable to create planet normal buffer")
         }
         self.normalBuffer = normalBuffer
+    }
+    
+    func generateMesh(radius: Float) {
+        self.terrainFaces = []
+
+        // Create the terrain faces
+        for i in 0..<directions.count {
+            self.terrainFaces.append(TerrainFace(resolution: self.resolution, localUp: directions[i]))
+        }
+        
+        // Generate the mesh for each face
+        self.rawMesh = RawMesh(vertices: [], indices: [], normals: [])
+        for terrainFace in self.terrainFaces {
+            terrainFace.construct_mesh()
+            let numberOfIndices = self.rawMesh.vertices.count
+            let shiftedIndices = terrainFace.mesh.indices.map { UInt16(numberOfIndices) + $0 }
+            self.rawMesh.indices.append(contentsOf: shiftedIndices)
+            self.rawMesh.vertices.append(contentsOf: terrainFace.mesh.vertices)
+            self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
+        }
+        
+        // Scale the meshes
+        self.rawMesh.vertices = self.rawMesh.vertices.map {
+            float3(x: $0.x * radius, y: $0.y * radius, z: $0.z * radius)
+        }
+        
+        // Calculate normals
+        self.normals = self.rawMesh.normals//calculateVertexNormals(vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
+    }
+    
+    func updateColor(_ color: SIMD3<Float>) {
+        for colorIndex in 0..<colors.count {
+            self.colors[colorIndex].x = color.x
+            self.colors[colorIndex].y = color.y
+            self.colors[colorIndex].z = color.z
+        }
+        
+        self.colorBuffer = self.device.makeBuffer(bytes: &self.colors, length: MemoryLayout<SIMD4<Float>>.stride * self.colors.count, options: [])!
+    }
+    
+    func updateSize(_ size: Float) {
+        self.generateMesh(radius: size)
+        self.vertexBuffer = self.device.makeBuffer(bytes: &self.rawMesh.vertices, length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: [])!
+        self.indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt16>.stride * self.rawMesh.indices.count, options: [])!
+        self.normalBuffer = device.makeBuffer(bytes: &self.normals, length: MemoryLayout<SIMD3<Float>>.stride * self.normals.count, options: [])!
+    }
+    
+    func update(encoder: MTLRenderCommandEncoder) {
+        encoder.setVertexBuffer(self.vertexBuffer, offset: 0, index: Position.index)
+        encoder.setVertexBuffer(self.colorBuffer, offset: 0, index: Color.index)
+        encoder.setVertexBuffer(self.normalBuffer, offset: 0, index: Normal.index)
     }
 }
 
@@ -119,9 +148,7 @@ extension Planet {
             length: MemoryLayout<Params>.stride,
             index: ParamsBuffer.index)
         
-        encoder.setVertexBuffer(self.vertexBuffer, offset: 0, index: Position.index)
-        encoder.setVertexBuffer(self.colorBuffer, offset: 0, index: Color.index)
-        encoder.setVertexBuffer(self.normalBuffer, offset: 0, index: Normal.index)
+        self.update(encoder: encoder)
         
         //encoder.setTriangleFillMode(.lines)
         

@@ -118,7 +118,7 @@ extension Renderer {
         params.cameraPosition = scene.camera.position
     }
     
-    func draw(scene: GameScene, in view: MTKView) {
+    func draw(scene: GameScene, in view: MTKView, options: Options) {
         guard
             let commandBuffer = Self.commandQueue.makeCommandBuffer(),
             let descriptor = view.currentRenderPassDescriptor,
@@ -139,6 +139,8 @@ extension Renderer {
             length: MemoryLayout<Light>.stride * lights.count,
             index: LightBuffer.index)
         
+        self.planet.updateColor(options.color)
+        self.planet.updateSize(options.shapeSettings.planetRadius)
         self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
         
         // Debug lights
