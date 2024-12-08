@@ -1,15 +1,15 @@
 ///// Copyright (c) 2023 Kodeco Inc.
-/// 
+///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-/// 
+///
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-/// 
+///
 /// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
 /// distribute, sublicense, create a derivative work, and/or sell copies of the
 /// Software in any work that is designed, intended, or marketed for pedagogical or
@@ -17,7 +17,7 @@
 /// or information technology.  Permission for such use, copying, modification,
 /// merger, publication, distribution, sublicensing, creation of derivative works,
 /// or sale is expressly withheld.
-/// 
+///
 /// This project and source code may use libraries or frameworks that are
 /// released under various Open-Source licenses. Use of those libraries and
 /// frameworks are governed by their own individual licenses.
@@ -33,57 +33,78 @@
 import MetalKit
 
 extension MTLVertexDescriptor {
-  static var defaultLayout: MTLVertexDescriptor? {
-    MTKMetalVertexDescriptorFromModelIO(.defaultLayout)
-  }
+    static var defaultLayout: MTLVertexDescriptor {
+        let vertexDescriptor = MTLVertexDescriptor()
+        
+        // Vertices
+        vertexDescriptor.attributes[Position.index].format = .float3
+        vertexDescriptor.attributes[Position.index].offset = 0
+        vertexDescriptor.attributes[Position.index].bufferIndex = 0
+        vertexDescriptor.layouts[Position.index].stride = MemoryLayout<SIMD3<Float>>.stride
+        
+        // Normals
+        vertexDescriptor.attributes[Normal.index].format = .float3
+        vertexDescriptor.attributes[Normal.index].offset = 0
+        vertexDescriptor.attributes[Normal.index].bufferIndex = Normal.index
+        vertexDescriptor.layouts[Normal.index].stride = MemoryLayout<SIMD3<Float>>.stride
+        
+        // Colors
+        vertexDescriptor.attributes[Color.index].format = .float4
+        vertexDescriptor.attributes[Color.index].offset = 0
+        vertexDescriptor.attributes[Color.index].bufferIndex = Color.index
+        vertexDescriptor.layouts[Color.index].stride =
+        MemoryLayout<simd_float4>.stride
+        
+        return vertexDescriptor
+    }
 }
 
 extension MDLVertexDescriptor {
-  static var defaultLayout: MDLVertexDescriptor {
-    let vertexDescriptor = MDLVertexDescriptor()
-    var offset = 0
-    vertexDescriptor.attributes[Position.index] = MDLVertexAttribute(
-      name: MDLVertexAttributePosition,
-      format: .float3,
-      offset: 0,
-      bufferIndex: VertexBuffer.index)
-    offset += MemoryLayout<float3>.stride
-
-    vertexDescriptor.attributes[Normal.index] = MDLVertexAttribute(
-      name: MDLVertexAttributeNormal,
-      format: .float3,
-      offset: offset,
-      bufferIndex: VertexBuffer.index)
-    offset += MemoryLayout<float3>.stride
-    vertexDescriptor.layouts[VertexBuffer.index]
-      = MDLVertexBufferLayout(stride: offset)
-
-    vertexDescriptor.attributes[UV.index] = MDLVertexAttribute(
-      name: MDLVertexAttributeTextureCoordinate,
-      format: .float2,
-      offset: 0,
-      bufferIndex: UVBuffer.index)
-    vertexDescriptor.layouts[UVBuffer.index]
-      = MDLVertexBufferLayout(stride: MemoryLayout<float2>.stride)
-
-    return vertexDescriptor
-  }
+    static var defaultLayout: MDLVertexDescriptor {
+        let vertexDescriptor = MDLVertexDescriptor()
+        var offset = 0
+        vertexDescriptor.attributes[Position.index] = MDLVertexAttribute(
+            name: MDLVertexAttributePosition,
+            format: .float3,
+            offset: 0,
+            bufferIndex: VertexBuffer.index)
+        offset += MemoryLayout<float3>.stride
+        
+        vertexDescriptor.attributes[Normal.index] = MDLVertexAttribute(
+            name: MDLVertexAttributeNormal,
+            format: .float3,
+            offset: offset,
+            bufferIndex: VertexBuffer.index)
+        offset += MemoryLayout<float3>.stride
+        vertexDescriptor.layouts[VertexBuffer.index]
+        = MDLVertexBufferLayout(stride: offset)
+        
+        vertexDescriptor.attributes[UV.index] = MDLVertexAttribute(
+            name: MDLVertexAttributeTextureCoordinate,
+            format: .float2,
+            offset: 0,
+            bufferIndex: UVBuffer.index)
+        vertexDescriptor.layouts[UVBuffer.index]
+        = MDLVertexBufferLayout(stride: MemoryLayout<float2>.stride)
+        
+        return vertexDescriptor
+    }
 }
 
 extension Attributes {
-  var index: Int {
-    return Int(self.rawValue)
-  }
+    var index: Int {
+        return Int(self.rawValue)
+    }
 }
 
 extension BufferIndices {
-  var index: Int {
-    return Int(self.rawValue)
-  }
+    var index: Int {
+        return Int(self.rawValue)
+    }
 }
 
 extension TextureIndices {
-  var index: Int {
-    return Int(self.rawValue)
-  }
+    var index: Int {
+        return Int(self.rawValue)
+    }
 }

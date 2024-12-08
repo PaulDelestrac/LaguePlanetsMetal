@@ -26,6 +26,7 @@ extension Vertex {
 struct RawMesh {
     var vertices: [SIMD3<Float>]
     var indices: [UInt16]
+    var normals: [SIMD3<Float>] = []
 }
 
 class TerrainFace {
@@ -70,5 +71,11 @@ class TerrainFace {
 
         self.mesh.vertices = vertices
         self.mesh.indices = triangles
+        self.mesh.normals = calculateVertexNormals(vertices: vertices, indices: triangles)
+        if localUp.x < 0 || localUp.y < 0 || localUp.z < 0 {
+            self.mesh.normals = self.mesh.normals.map { normal in
+                return -normal
+            }
+        }
     }
 }

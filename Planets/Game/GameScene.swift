@@ -33,20 +33,6 @@
 import MetalKit
 
 struct GameScene {
-    lazy var gizmo: Model = {
-        Model(name: "gizmo.usdz")
-    }()
-    
-    lazy var sphere: Model = {
-        Model(name: "lighting-sphere.usdz")
-    }()
-    
-    lazy var planet: Model = {
-        let rawPlanet = Planet()
-        return Model(name: "planet", vertices: rawPlanet.rawMesh.vertices, indices: rawPlanet.rawMesh.indices)
-    }()
-
-    var models: [Model] = []
     var camera = ArcballCamera()
     
     var defaultView: Transform {
@@ -60,7 +46,6 @@ struct GameScene {
     init() {
         camera.distance = 2.5
         camera.transform = defaultView
-        models = [gizmo, planet]
     }
     
     mutating func update(size: CGSize) {
@@ -76,22 +61,5 @@ struct GameScene {
             camera.transform = defaultView
         }
         camera.update(deltaTime: deltaTime)
-        calculateGizmo()
-    }
-    
-    mutating func calculateGizmo() {
-        var forwardVector: float3 {
-            let lookat = float4x4(eye: camera.position, center: .zero, up: [0, 1, 0])
-            return [
-                lookat.columns.0.z, lookat.columns.1.z, lookat.columns.2.z
-            ]
-        }
-        var rightVector: float3 {
-            let lookat = float4x4(eye: camera.position, center: .zero, up: [0, 1, 0])
-            return [
-                lookat.columns.0.x, lookat.columns.1.x, lookat.columns.2.x
-            ]
-        }
-        gizmo.position = (forwardVector - rightVector) * 100
     }
 }

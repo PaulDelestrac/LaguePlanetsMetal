@@ -34,15 +34,15 @@
 using namespace metal;
 
 struct VertexIn {
-    float4 position [[attribute(Position)]];
+    float3 position [[attribute(Position)]];
     float3 normal [[attribute(Normal)]];
-    float2 uv [[attribute(UV)]];
+    float4 color [[attribute(Color)]];
 };
 
 struct VertexOut {
     float4 position [[position]];
     float3 normal;
-    float2 uv;
+    float4 color;
     float3 worldPosition;
     float3 worldNormal;
 };

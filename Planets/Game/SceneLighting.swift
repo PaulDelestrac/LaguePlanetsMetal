@@ -51,7 +51,7 @@ struct SceneLighting {
 
     let ambientLight: Light = {
         var light = Self.buildDefaultLight()
-        light.color = [0.05, 0.1, 0]
+        light.color = [0.1, 0.05, 0.05]
         light.type = Ambient
         return light
     }()

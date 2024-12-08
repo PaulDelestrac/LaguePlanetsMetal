@@ -45,6 +45,7 @@ class Renderer: NSObject {
     var uniforms = Uniforms()
     var params = Params()
     
+    var planet: Planet
     
     init(metalView: MTKView) {
         guard
@@ -55,6 +56,8 @@ class Renderer: NSObject {
         Self.device = device
         Self.commandQueue = commandQueue
         metalView.device = device
+        
+        self.planet = Planet(device: device)
         
         // create the shader function library
         let library = device.makeDefaultLibrary()
@@ -136,21 +139,18 @@ extension Renderer {
             length: MemoryLayout<Light>.stride * lights.count,
             index: LightBuffer.index)
         
-        for model in scene.models {
-            if model.name == "gizmo" {
-                continue
-            } else {
-                model.render(
-                    encoder: renderEncoder,
-                    uniforms: uniforms,
-                    params: params)
-            }
-        }
+        self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
         
+        // Debug lights
         /*DebugLights.draw(
          lights: scene.lighting.lights,
          encoder: renderEncoder,
          uniforms: uniforms)*/
+         
+        // Debug normals
+        /*for normal in self.planet.normals {
+            DebugLights.debugDrawDirection(renderEncoder: renderEncoder, uniforms: uniforms, direction: normal, color: float3(1, 0, 0), count: 1)
+        }*/
         
         renderEncoder.endEncoding()
         guard let drawable = view.currentDrawable else {

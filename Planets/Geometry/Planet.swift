@@ -12,12 +12,16 @@ class Planet : Transformable {
     var transform = Transform()
     var terrainFaces: [TerrainFace]
     var rawMesh: RawMesh
-    //var meshes: [Mesh]
-    let resolution: Int = 100
+    let resolution: Int = 10
     var tiling: UInt32 = 1
     
-    //let vertexBuffer: MDLMeshBuffer
-    //let indexBuffer: MDLMeshBuffer
+    var colors: [SIMD4<Float>] = []
+    var normals: [SIMD3<Float>] = []
+    
+    let vertexBuffer: MTLBuffer
+    let indexBuffer: MTLBuffer
+    let colorBuffer: MTLBuffer
+    let normalBuffer: MTLBuffer
     
     let directions: [SIMD3<Float>] = [
         SIMD3<Float>(1, 0, 0),  // Right
@@ -28,7 +32,7 @@ class Planet : Transformable {
         SIMD3<Float>(0, 0, -1)  // Back
     ]
     
-    init(/*device: MTLDevice, */scale: Float = 1) {
+    init(device: MTLDevice, scale: Float = 1) {
         self.terrainFaces = []
         
         // Create the terrain faces
@@ -44,48 +48,53 @@ class Planet : Transformable {
             let shiftedIndices = terrainFace.mesh.indices.map { UInt16(numberOfIndices) + $0 }
             self.rawMesh.indices.append(contentsOf: shiftedIndices)
             self.rawMesh.vertices.append(contentsOf: terrainFace.mesh.vertices)
+            self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
         }
-        
-        //let allocator = MTKMeshBufferAllocator(device: device)
         
         // Scale the meshes
         self.rawMesh.vertices = self.rawMesh.vertices.map {
             float3(x: $0.x * scale, y: $0.y * scale, z: $0.z * scale)
         }
         
+        // Initialize random colors
+        for _ in self.rawMesh.vertices {
+            // Random colors
+            //self.colors.append(SIMD4<Float>(Float.random(in: 0...1), Float.random(in: 0...1), Float.random(in: 0...1), 1))
+            // Green
+            //self.colors.append(SIMD4<Float>(0, 1, 0, 1))
+            // Grey
+            self.colors.append(SIMD4<Float>(0.8, 0.8, 0.8, 1))
+        }
+        
+        // Calculate normals
+        self.normals = self.rawMesh.normals//calculateVertexNormals(vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
+        
         // Vertex buffer
-        //let data = Data.init(bytes: &self.rawMesh.vertices, count: self.rawMesh.vertices.count * MemoryLayout<Vertex>.stride)
-        //let vertexBuffer = allocator.newBuffer(with: data, type: .vertex)
-        //let vertexBuffer = device.makeBuffer(bytes: &self.rawMesh.vertices, length: self.rawMesh.vertices.count * MemoryLayout<Vertex>.stride, options: [])!
-
+        guard let vertexBuffer = device.makeBuffer(bytes: &self.rawMesh.vertices, length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: []) else {
+            fatalError("Unable to create planet vertex buffer")
+        }
+        self.vertexBuffer = vertexBuffer
+        
         // Index buffer
-        //let indexData = Data.init(bytes: &self.rawMesh.indices, count: self.rawMesh.indices.count * MemoryLayout<UInt16>.stride)
-        //let indexBuffer = allocator.newBuffer(with: indexData, type: .index)
-        //let indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: self.rawMesh.indices.count * MemoryLayout<UInt16>.stride, options: [])!
+        guard let indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt16>.stride * self.rawMesh.indices.count, options: []) else {
+            fatalError("Unable to create planet index buffer")
+        }
+        self.indexBuffer = indexBuffer
         
-        //self.vertexBuffer = vertexBuffer
-        //self.indexBuffer = indexBuffer
+        // Color buffer
+        guard let colorBuffer = device.makeBuffer(bytes: &self.colors, length: MemoryLayout<SIMD4<Float>>.stride * self.colors.count, options: []) else {
+            fatalError("Unable to create planet color buffer")
+        }
+        self.colorBuffer = colorBuffer
         
-        /*let submesh = MDLSubmesh(
-            indexBuffer: indexBuffer,
-            indexCount: self.rawMesh.indices.count,
-            indexType: .uint16,
-            geometryType: .triangles,
-            material: nil)*/
-        
-        /*let vertexDescriptor = MDLVertexDescriptor()
-        vertexDescriptor.attributes[Position.index] = MDLVertexAttribute(
-            name: MDLVertexAttributePosition, format: .float3, offset: 0, bufferIndex: VertexBuffer.index
-            )*/
-
-        /*let mdlMesh = MDLMesh(vertexBuffer: vertexBuffer, vertexCount: self.rawMesh.vertices.count, descriptor: vertexDescriptor, submeshes: [submesh])
-        
-        let mtkMesh = try! MTKMesh(mesh: mdlMesh, device: device)
-        
-        self.meshes = [Mesh(mdlMesh: mdlMesh, mtkMesh: mtkMesh)]*/
+        // Normal buffer
+        guard let normalBuffer = device.makeBuffer(bytes: &self.normals, length: MemoryLayout<SIMD3<Float>>.stride * self.normals.count, options: []) else {
+            fatalError("Unable to create planet normal buffer")
+        }
+        self.normalBuffer = normalBuffer
     }
 }
-/*
+
 // Rendering
 extension Planet {
     func render(
@@ -110,32 +119,46 @@ extension Planet {
             length: MemoryLayout<Params>.stride,
             index: ParamsBuffer.index)
         
-        for mesh in meshes {
-            for (index, vertexBuffer) in mesh.vertexBuffers.enumerated() {
-                encoder.setVertexBuffer(
-                    vertexBuffer,
-                    offset: 0,
-                    index: index)
-            }
-            
-            for submesh in mesh.submeshes {
-                
-                // set the fragment texture here
-                
-                encoder.setFragmentTexture(
-                    submesh.textures.baseColor,
-                    index: BaseColor.index)
-                
-                //encoder.setTriangleFillMode(.lines) // Show wireframe
-                
-                encoder.drawIndexedPrimitives(
-                    type: .triangle,
-                    indexCount: submesh.indexCount,
-                    indexType: submesh.indexType,
-                    indexBuffer: submesh.indexBuffer,
-                    indexBufferOffset: submesh.indexBufferOffset
-                )
-            }
-        }
+        encoder.setVertexBuffer(self.vertexBuffer, offset: 0, index: Position.index)
+        encoder.setVertexBuffer(self.colorBuffer, offset: 0, index: Color.index)
+        encoder.setVertexBuffer(self.normalBuffer, offset: 0, index: Normal.index)
+        
+        //encoder.setTriangleFillMode(.lines)
+        
+        encoder.drawIndexedPrimitives(
+            type: .triangle, indexCount: self.rawMesh.indices.count, indexType: .uint16, indexBuffer: self.indexBuffer, indexBufferOffset: 0
+            )
     }
-}*/
+}
+
+// Calculate vertex normals for a list of vertices assuming triangular mesh
+func calculateVertexNormals(vertices: [SIMD3<Float>], indices: [UInt16]) -> [SIMD3<Float>] {
+    // Initialize normal vectors with zero
+    var vertexNormals = [SIMD3<Float>](repeating: float3(0, 0, 0), count: vertices.count)
+    
+    // Calculate face normals and accumulate for each vertex
+    for i in stride(from: 0, to: indices.count, by: 3) {
+        guard i + 2 < indices.count else { break }
+        
+        let index0 = Int(indices[i])
+        let index1 = Int(indices[i + 1])
+        let index2 = Int(indices[i + 2])
+        
+        let A = vertices[index0]
+        let B = vertices[index1]
+        let C = vertices[index2]
+        
+        // Calculate face normal using cross product
+        let faceNormal = cross(B - A, C - A)
+        
+        // Accumulate normal for each vertex of the triangle
+        vertexNormals[index0] += faceNormal
+        vertexNormals[index1] += faceNormal
+        vertexNormals[index2] += faceNormal
+    }
+    
+    // Normalize the accumulated normals
+    return vertexNormals.map { vertex in
+        return normalize(vertex)
+    }
+}
