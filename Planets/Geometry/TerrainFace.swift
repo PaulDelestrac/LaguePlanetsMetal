@@ -23,13 +23,13 @@ extension Vertex {
     }
 }
 
-struct Mesh {
-    var vertices: [Vertex]
+struct RawMesh {
+    var vertices: [SIMD3<Float>]
     var indices: [UInt16]
 }
 
 class TerrainFace {
-    var mesh: Mesh = Mesh(vertices: [], indices: [])
+    var mesh = RawMesh(vertices: [], indices: [])
     let resolution: Int
     let localUp: SIMD3<Float>
     var axisA: SIMD3<Float>
@@ -44,7 +44,7 @@ class TerrainFace {
     }
     
     func construct_mesh() {
-        var vertices: [Vertex] = []
+        var vertices: [SIMD3<Float>] = []
         var triangles: [UInt16] = []
         
         for y in 0..<self.resolution {
@@ -54,7 +54,7 @@ class TerrainFace {
                 let pointOnUnitCube = localUp + (Float(percent.x) - 0.5) * 2 * self.axisA + (Float(percent.y) - 0.5) * 2 * self.axisB
                 let pointOnUnitSphere = normalize(pointOnUnitCube)
                 //vertices.append(Vertex(pointOnUnitCube))
-                vertices.append(Vertex(pointOnUnitSphere))
+                vertices.append(pointOnUnitSphere)
                 
                 if (x != self.resolution - 1) && (y != self.resolution - 1) {
                     triangles.append(UInt16(index))
@@ -67,7 +67,7 @@ class TerrainFace {
                 }
             }
         }
-        
+
         self.mesh.vertices = vertices
         self.mesh.indices = triangles
     }
