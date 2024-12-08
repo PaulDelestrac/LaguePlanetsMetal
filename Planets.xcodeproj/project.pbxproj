@@ -11,6 +11,7 @@
 		140F64762D04E3FB00C89262 /* Planet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F64732D04E3FB00C89262 /* Planet.swift */; };
 		14CAE33E2D061C0200A4CECC /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33D2D061C0200A4CECC /* Options.swift */; };
 		14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */; };
+		14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */; };
 		14E8CE8B2D04E2EA00AE0D67 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E8CE722D04E2EA00AE0D67 /* Preview Assets.xcassets */; };
 		14E8CE8D2D04E2EA00AE0D67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E8CE852D04E2EA00AE0D67 /* Assets.xcassets */; };
 		14E8CE8E2D04E2EA00AE0D67 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE5D2D04E2EA00AE0D67 /* Camera.swift */; };
@@ -40,6 +41,7 @@
 		14B588BE2D03A29200A350DF /* Planets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Planets.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14CAE33D2D061C0200A4CECC /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSettings.swift; sourceTree = "<group>"; };
+		14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeGenerator.swift; sourceTree = "<group>"; };
 		14E8CE5D2D04E2EA00AE0D67 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		14E8CE5E2D04E2EA00AE0D67 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		14E8CE5F2D04E2EA00AE0D67 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 				14E8CE692D04E2EA00AE0D67 /* Transform.swift */,
 				14E8CE6A2D04E2EA00AE0D67 /* VertexDescriptor.swift */,
 				14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */,
+				14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 				14E8CE922D04E2EA00AE0D67 /* Renderer.swift in Sources */,
 				14E8CE942D04E2EA00AE0D67 /* SceneLighting.swift in Sources */,
 				14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */,
+				14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */,
 				14E8CE992D04E2EA00AE0D67 /* Transform.swift in Sources */,
 				14E8CE9A2D04E2EA00AE0D67 /* VertexDescriptor.swift in Sources */,
 				14E8CE9B2D04E2EA00AE0D67 /* InputController.swift in Sources */,

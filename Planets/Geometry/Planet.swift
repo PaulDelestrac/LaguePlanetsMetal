@@ -11,10 +11,14 @@ import MetalKit
 class Planet : Transformable {
     let device: MTLDevice
     var transform = Transform()
+    
     var terrainFaces: [TerrainFace] = []
     var rawMesh: RawMesh = RawMesh(vertices: [], indices: [])
     let resolution: Int = 10
     var tiling: UInt32 = 1
+    
+    let shapeSettings: ShapeSettings
+    let shapeGenerator: ShapeGenerator
     
     var colors: [SIMD4<Float>] = []
     var normals: [SIMD3<Float>] = []
@@ -33,9 +37,11 @@ class Planet : Transformable {
         SIMD3<Float>(0, 0, -1)  // Back
     ]
     
-    init(device: MTLDevice, scale: Float = 1, color: float3 = float3(0, 0, 0)) {
+    init(device: MTLDevice, shapeSettings: ShapeSettings, color: float3 = float3(0, 0, 0)) {
         self.device = device
-        self.generateMesh(radius: scale)
+        self.shapeSettings = shapeSettings
+        self.shapeGenerator = ShapeGenerator(settings: self.shapeSettings)
+        self.generateMesh(radius: self.shapeSettings.planetRadius)
         
         // Initialize random colors
         for _ in self.rawMesh.vertices {
@@ -77,7 +83,7 @@ class Planet : Transformable {
 
         // Create the terrain faces
         for i in 0..<directions.count {
-            self.terrainFaces.append(TerrainFace(resolution: self.resolution, localUp: directions[i]))
+            self.terrainFaces.append(TerrainFace(shapeGenerator: self.shapeGenerator, resolution: self.resolution, localUp: directions[i]))
         }
         
         // Generate the mesh for each face

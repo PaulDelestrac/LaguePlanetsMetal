@@ -42,7 +42,7 @@ class GameController: NSObject {
     var isEditing: Bool
     
     init(metalView: MTKView, options: Options, isEditing: Bool = false) {
-        renderer = Renderer(metalView: metalView)
+        renderer = Renderer(metalView: metalView, options: options)
         scene = GameScene()
         self.options = options
         self.isEditing = isEditing

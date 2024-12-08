@@ -31,12 +31,16 @@ struct RawMesh {
 
 class TerrainFace {
     var mesh = RawMesh(vertices: [], indices: [])
+    
+    let shapeGenerator: ShapeGenerator
+    
     let resolution: Int
     let localUp: SIMD3<Float>
     var axisA: SIMD3<Float>
     var axisB: SIMD3<Float>
     
-    init(resolution: Int, localUp: SIMD3<Float>) {
+    init(shapeGenerator: ShapeGenerator, resolution: Int, localUp: SIMD3<Float>) {
+        self.shapeGenerator = shapeGenerator
         self.resolution = resolution
         self.localUp = localUp
         
@@ -55,7 +59,7 @@ class TerrainFace {
                 let pointOnUnitCube = localUp + (Float(percent.x) - 0.5) * 2 * self.axisA + (Float(percent.y) - 0.5) * 2 * self.axisB
                 let pointOnUnitSphere = normalize(pointOnUnitCube)
                 //vertices.append(Vertex(pointOnUnitCube))
-                vertices.append(pointOnUnitSphere)
+                vertices.append(shapeGenerator.calculatePointOnPlanet(pointOnUnitSphere: pointOnUnitSphere))
                 
                 if (x != self.resolution - 1) && (y != self.resolution - 1) {
                     triangles.append(UInt16(index))

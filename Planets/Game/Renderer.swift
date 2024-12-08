@@ -47,7 +47,7 @@ class Renderer: NSObject {
     
     var planet: Planet
     
-    init(metalView: MTKView) {
+    init(metalView: MTKView, options: Options) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
             let commandQueue = device.makeCommandQueue() else {
@@ -57,7 +57,7 @@ class Renderer: NSObject {
         Self.commandQueue = commandQueue
         metalView.device = device
         
-        self.planet = Planet(device: device)
+        self.planet = Planet(device: device, shapeSettings: options.shapeSettings)
         
         // create the shader function library
         let library = device.makeDefaultLibrary()
