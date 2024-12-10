@@ -47,6 +47,8 @@ class Renderer: NSObject {
     
     var planet: Planet
     
+    var oldOptions: Options = Options()
+    
     init(metalView: MTKView, options: Options) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
@@ -140,7 +142,10 @@ extension Renderer {
             index: LightBuffer.index)
         
         self.planet.updateColor(options.color)
-        self.planet.updateSize(options.shapeSettings.planetRadius)
+        if options.shapeSettings.hasChanged {
+            self.planet.updateShape(settings: options.shapeSettings)
+            oldOptions.shapeSettings = options.shapeSettings
+        }
         self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
         
         // Debug lights

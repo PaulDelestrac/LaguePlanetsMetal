@@ -12,6 +12,9 @@
 		14CAE33E2D061C0200A4CECC /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33D2D061C0200A4CECC /* Options.swift */; };
 		14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */; };
 		14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */; };
+		14CAE3442D06503700A4CECC /* Noise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3432D06503700A4CECC /* Noise.swift */; };
+		14E127342D077F6500E12420 /* NoiseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E127332D077F6500E12420 /* NoiseFilter.swift */; };
+		14E127362D0786F700E12420 /* NoiseSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E127352D0786F700E12420 /* NoiseSettings.swift */; };
 		14E8CE8B2D04E2EA00AE0D67 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E8CE722D04E2EA00AE0D67 /* Preview Assets.xcassets */; };
 		14E8CE8D2D04E2EA00AE0D67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E8CE852D04E2EA00AE0D67 /* Assets.xcassets */; };
 		14E8CE8E2D04E2EA00AE0D67 /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE5D2D04E2EA00AE0D67 /* Camera.swift */; };
@@ -42,6 +45,9 @@
 		14CAE33D2D061C0200A4CECC /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSettings.swift; sourceTree = "<group>"; };
 		14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeGenerator.swift; sourceTree = "<group>"; };
+		14CAE3432D06503700A4CECC /* Noise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Noise.swift; sourceTree = "<group>"; };
+		14E127332D077F6500E12420 /* NoiseFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseFilter.swift; sourceTree = "<group>"; };
+		14E127352D0786F700E12420 /* NoiseSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseSettings.swift; sourceTree = "<group>"; };
 		14E8CE5D2D04E2EA00AE0D67 /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		14E8CE5E2D04E2EA00AE0D67 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		14E8CE5F2D04E2EA00AE0D67 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -105,6 +111,8 @@
 				14E8CE602D04E2EA00AE0D67 /* PlayerCamera.swift */,
 				14E8CE612D04E2EA00AE0D67 /* Renderer.swift */,
 				14E8CE632D04E2EA00AE0D67 /* SceneLighting.swift */,
+				14E127332D077F6500E12420 /* NoiseFilter.swift */,
+				14E127352D0786F700E12420 /* NoiseSettings.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -168,6 +176,7 @@
 				14E8CE812D04E2EA00AE0D67 /* DebugLights.metal */,
 				14E8CE822D04E2EA00AE0D67 /* DebugLights.swift */,
 				14E8CE832D04E2EA00AE0D67 /* MathLibrary.swift */,
+				14CAE3432D06503700A4CECC /* Noise.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -263,8 +272,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				14E8CE8E2D04E2EA00AE0D67 /* Camera.swift in Sources */,
+				14CAE3442D06503700A4CECC /* Noise.swift in Sources */,
 				14E8CE8F2D04E2EA00AE0D67 /* GameController.swift in Sources */,
 				14E8CE902D04E2EA00AE0D67 /* GameScene.swift in Sources */,
+				14E127362D0786F700E12420 /* NoiseSettings.swift in Sources */,
 				14E8CE912D04E2EA00AE0D67 /* PlayerCamera.swift in Sources */,
 				14E8CE922D04E2EA00AE0D67 /* Renderer.swift in Sources */,
 				14E8CE942D04E2EA00AE0D67 /* SceneLighting.swift in Sources */,
@@ -285,6 +296,7 @@
 				14E8CEA32D04E2EA00AE0D67 /* DebugLights.metal in Sources */,
 				14E8CEA42D04E2EA00AE0D67 /* DebugLights.swift in Sources */,
 				14E8CEA52D04E2EA00AE0D67 /* MathLibrary.swift in Sources */,
+				14E127342D077F6500E12420 /* NoiseFilter.swift in Sources */,
 				14E8CEA62D04E2EA00AE0D67 /* PlanetsApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

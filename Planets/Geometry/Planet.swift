@@ -14,11 +14,10 @@ class Planet : Transformable {
     
     var terrainFaces: [TerrainFace] = []
     var rawMesh: RawMesh = RawMesh(vertices: [], indices: [])
-    let resolution: Int = 10
     var tiling: UInt32 = 1
     
-    let shapeSettings: ShapeSettings
-    let shapeGenerator: ShapeGenerator
+    var shapeSettings: ShapeSettings
+    var shapeGenerator: ShapeGenerator
     
     var colors: [SIMD4<Float>] = []
     var normals: [SIMD3<Float>] = []
@@ -41,7 +40,7 @@ class Planet : Transformable {
         self.device = device
         self.shapeSettings = shapeSettings
         self.shapeGenerator = ShapeGenerator(settings: self.shapeSettings)
-        self.generateMesh(radius: self.shapeSettings.planetRadius)
+        self.generateMesh()
         
         // Initialize random colors
         for _ in self.rawMesh.vertices {
@@ -78,12 +77,12 @@ class Planet : Transformable {
         self.normalBuffer = normalBuffer
     }
     
-    func generateMesh(radius: Float) {
+    func generateMesh() {
         self.terrainFaces = []
 
         // Create the terrain faces
         for i in 0..<directions.count {
-            self.terrainFaces.append(TerrainFace(shapeGenerator: self.shapeGenerator, resolution: self.resolution, localUp: directions[i]))
+            self.terrainFaces.append(TerrainFace(shapeGenerator: self.shapeGenerator, resolution: self.shapeSettings.resolution, localUp: directions[i]))
         }
         
         // Generate the mesh for each face
@@ -97,16 +96,15 @@ class Planet : Transformable {
             self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
         }
         
-        // Scale the meshes
-        self.rawMesh.vertices = self.rawMesh.vertices.map {
-            float3(x: $0.x * radius, y: $0.y * radius, z: $0.z * radius)
-        }
-        
         // Calculate normals
-        self.normals = self.rawMesh.normals//calculateVertexNormals(vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
+        self.normals = self.rawMesh.normals
     }
     
     func updateColor(_ color: SIMD3<Float>) {
+        if colors.count != self.rawMesh.vertices.count {
+            let newColors = Array(repeating: SIMD4<Float>(), count: self.rawMesh.vertices.count)
+            self.colors = newColors
+        }
         for colorIndex in 0..<colors.count {
             self.colors[colorIndex].x = color.x
             self.colors[colorIndex].y = color.y
@@ -116,11 +114,15 @@ class Planet : Transformable {
         self.colorBuffer = self.device.makeBuffer(bytes: &self.colors, length: MemoryLayout<SIMD4<Float>>.stride * self.colors.count, options: [])!
     }
     
-    func updateSize(_ size: Float) {
-        self.generateMesh(radius: size)
+    func updateShape(settings: ShapeSettings) {
+        self.shapeSettings = settings
+        self.shapeGenerator = ShapeGenerator(settings: settings)
+        self.generateMesh()
         self.vertexBuffer = self.device.makeBuffer(bytes: &self.rawMesh.vertices, length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: [])!
         self.indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt16>.stride * self.rawMesh.indices.count, options: [])!
         self.normalBuffer = device.makeBuffer(bytes: &self.normals, length: MemoryLayout<SIMD3<Float>>.stride * self.normals.count, options: [])!
+        
+        self.updateColor(self.colors[0].xyz)
     }
     
     func update(encoder: MTLRenderCommandEncoder) {
