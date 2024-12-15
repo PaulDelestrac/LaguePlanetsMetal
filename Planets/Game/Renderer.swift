@@ -148,6 +148,9 @@ extension Renderer {
             oldOptions.shapeSettings = options.shapeSettings
             options.shapeSettings.needsUpdate = false
         }
+        
+        //renderEncoder.setTriangleFillMode(.lines)
+        
         self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
         
         // Debug lights
@@ -157,8 +160,9 @@ extension Renderer {
          uniforms: uniforms)*/
          
         // Debug normals
-        /*for normal in self.planet.normals {
-            DebugLights.debugDrawDirection(renderEncoder: renderEncoder, uniforms: uniforms, direction: normal, color: float3(1, 0, 0), count: 1)
+        //assert(self.planet.normals.count == self.planet.rawMesh.vertices.count)
+        /*for (vertex, normal) in zip(self.planet.rawMesh.vertices, self.planet.normals) {
+            DebugLights.debugDrawLine(renderEncoder: renderEncoder, uniforms: uniforms, position: vertex, direction: normal, color: float3(1, 0, 0))
         }*/
         
         renderEncoder.endEncoding()

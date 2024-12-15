@@ -165,8 +165,6 @@ extension Planet {
         
         self.update(encoder: encoder)
         
-        //encoder.setTriangleFillMode(.lines)
-        
         encoder.drawIndexedPrimitives(
             type: .triangle, indexCount: self.rawMesh.indices.count, indexType: .uint32, indexBuffer: self.indexBuffer, indexBufferOffset: 0
             )
