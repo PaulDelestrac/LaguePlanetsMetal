@@ -16,7 +16,7 @@ class ShapeGenerator {
         self.settings = settings
         self.noiseFilters = []
         for noiseLayer in settings.noiseLayers {
-            self.noiseFilters.append(NoiseFilter(settings: noiseLayer.noiseSettings))
+            self.noiseFilters.append(NoiseFilterManager.createNoiseFilter(settings: noiseLayer.noiseSettings))
         }
     }
     

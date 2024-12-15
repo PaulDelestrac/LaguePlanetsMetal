@@ -47,6 +47,7 @@ class Renderer: NSObject {
     
     var planet: Planet
     
+    var needsUpdate: Bool = true
     var oldOptions: Options = Options()
     
     init(metalView: MTKView, options: Options) {
@@ -142,9 +143,10 @@ extension Renderer {
             index: LightBuffer.index)
         
         self.planet.updateColor(options.color)
-        if options.shapeSettings.hasChanged {
+        if options.shapeSettings.isChanging || options.shapeSettings.needsUpdate {
             self.planet.updateShape(settings: options.shapeSettings)
             oldOptions.shapeSettings = options.shapeSettings
+            options.shapeSettings.needsUpdate = false
         }
         self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
         

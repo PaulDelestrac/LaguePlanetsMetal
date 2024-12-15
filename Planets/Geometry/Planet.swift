@@ -28,13 +28,17 @@ class Planet : Transformable {
     var normalBuffer: MTLBuffer!
     
     let directions: [SIMD3<Float>] = [
-        SIMD3<Float>(1, 0, 0),  // Right
-        SIMD3<Float>(0, 1, 0),  // Up
-        SIMD3<Float>(0, 0, 1),  // Forward
+        SIMD3<Float>(0, 1, 0),  // Top
+        SIMD3<Float>(0, -1, 0), // Bottom
         SIMD3<Float>(-1, 0, 0), // Left
-        SIMD3<Float>(0, -1, 0), // Down
+        SIMD3<Float>(1, 0, 0),  // Right
+        SIMD3<Float>(0, 0, 1),  // Front
         SIMD3<Float>(0, 0, -1)  // Back
     ]
+    
+    enum FaceRenderMask: Int {
+    case All, Top, Bottom, Left, Right, Front, Back
+    }
     
     init(device: MTLDevice, shapeSettings: ShapeSettings, color: float3 = float3(0, 0, 0)) {
         self.device = device
@@ -59,7 +63,7 @@ class Planet : Transformable {
         self.vertexBuffer = vertexBuffer
         
         // Index buffer
-        guard let indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt16>.stride * self.rawMesh.indices.count, options: []) else {
+        guard let indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt32>.stride * self.rawMesh.indices.count, options: []) else {
             fatalError("Unable to create planet index buffer")
         }
         self.indexBuffer = indexBuffer
@@ -82,7 +86,10 @@ class Planet : Transformable {
 
         // Create the terrain faces
         for i in 0..<directions.count {
-            self.terrainFaces.append(TerrainFace(shapeGenerator: self.shapeGenerator, resolution: self.shapeSettings.resolution, localUp: directions[i]))
+            let renderFace: Bool = (shapeSettings.faceRenderMask == FaceRenderMask.All) || (shapeSettings.faceRenderMask.rawValue - 1 == i)
+            if renderFace {
+                self.terrainFaces.append(TerrainFace(shapeGenerator: self.shapeGenerator, resolution: self.shapeSettings.resolution, localUp: directions[i]))
+            }
         }
         
         // Generate the mesh for each face
@@ -90,7 +97,7 @@ class Planet : Transformable {
         for terrainFace in self.terrainFaces {
             terrainFace.construct_mesh()
             let numberOfIndices = self.rawMesh.vertices.count
-            let shiftedIndices = terrainFace.mesh.indices.map { UInt16(numberOfIndices) + $0 }
+            let shiftedIndices = terrainFace.mesh.indices.map { UInt32(numberOfIndices) + $0 }
             self.rawMesh.indices.append(contentsOf: shiftedIndices)
             self.rawMesh.vertices.append(contentsOf: terrainFace.mesh.vertices)
             self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
@@ -119,7 +126,7 @@ class Planet : Transformable {
         self.shapeGenerator = ShapeGenerator(settings: settings)
         self.generateMesh()
         self.vertexBuffer = self.device.makeBuffer(bytes: &self.rawMesh.vertices, length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: [])!
-        self.indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt16>.stride * self.rawMesh.indices.count, options: [])!
+        self.indexBuffer = device.makeBuffer(bytes: &self.rawMesh.indices, length: MemoryLayout<UInt32>.stride * self.rawMesh.indices.count, options: [])!
         self.normalBuffer = device.makeBuffer(bytes: &self.normals, length: MemoryLayout<SIMD3<Float>>.stride * self.normals.count, options: [])!
         
         self.updateColor(self.colors[0].xyz)
@@ -161,13 +168,13 @@ extension Planet {
         //encoder.setTriangleFillMode(.lines)
         
         encoder.drawIndexedPrimitives(
-            type: .triangle, indexCount: self.rawMesh.indices.count, indexType: .uint16, indexBuffer: self.indexBuffer, indexBufferOffset: 0
+            type: .triangle, indexCount: self.rawMesh.indices.count, indexType: .uint32, indexBuffer: self.indexBuffer, indexBufferOffset: 0
             )
     }
 }
 
 // Calculate vertex normals for a list of vertices assuming triangular mesh
-func calculateVertexNormals(vertices: [SIMD3<Float>], indices: [UInt16]) -> [SIMD3<Float>] {
+func calculateVertexNormals(vertices: [SIMD3<Float>], indices: [UInt32]) -> [SIMD3<Float>] {
     // Initialize normal vectors with zero
     var vertexNormals = [SIMD3<Float>](repeating: float3(0, 0, 0), count: vertices.count)
     

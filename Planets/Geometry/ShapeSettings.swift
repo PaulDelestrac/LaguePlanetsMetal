@@ -7,11 +7,13 @@
 
 import Foundation
 
-class ShapeSettings {
+@Observable class ShapeSettings {
     var resolution: Int = 10
     var planetRadius: Float = 1.0
     var noiseLayers = [NoiseLayer]()
-    var hasChanged = false
+    var isChanging = false
+    var needsUpdate: Bool = true
+    var faceRenderMask: Planet.FaceRenderMask = .All
     
     init() {
     }

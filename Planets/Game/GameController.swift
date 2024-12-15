@@ -40,12 +40,14 @@ class GameController: NSObject {
     var deltaTime: Double = 0
     var lastTime: Double = CFAbsoluteTimeGetCurrent()
     var isEditing: Bool
+    var isScrolling: Bool
     
-    init(metalView: MTKView, options: Options, isEditing: Bool = false) {
+    init(metalView: MTKView, options: Options, isEditing: Bool = false, isScrolling: Bool = false) {
         renderer = Renderer(metalView: metalView, options: options)
         scene = GameScene()
         self.options = options
         self.isEditing = isEditing
+        self.isScrolling = isScrolling
         super.init()
         metalView.delegate = self
         fps = Double(metalView.preferredFramesPerSecond)
@@ -55,7 +57,7 @@ class GameController: NSObject {
 
 extension GameController: MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        if !isEditing {
+        if !options.shapeSettings.isChanging && !self.isScrolling {
             scene.update(size: size)
         }
         renderer.mtkView(view, drawableSizeWillChange: size)
@@ -65,8 +67,8 @@ extension GameController: MTKViewDelegate {
         let currentTime = CFAbsoluteTimeGetCurrent()
         let deltaTime = (currentTime - lastTime)
         lastTime = currentTime
-        if !isEditing {
-            scene.update(deltaTime: Float(deltaTime))
+        if !options.shapeSettings.isChanging {
+            scene.update(deltaTime: Float(deltaTime), isScrolling: self.isScrolling)
         }
         renderer.draw(scene: scene, in: view, options: options)
     }

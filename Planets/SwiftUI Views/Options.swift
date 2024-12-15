@@ -33,8 +33,7 @@
 import SwiftUI
 import Observation
 
-@Observable
-class Options {
+@Observable class Options {
     var color = float3(0, 0, 0);
     var shapeSettings = ShapeSettings();
 }

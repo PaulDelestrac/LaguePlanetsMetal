@@ -25,7 +25,7 @@ extension Vertex {
 
 struct RawMesh {
     var vertices: [SIMD3<Float>]
-    var indices: [UInt16]
+    var indices: [UInt32]
     var normals: [SIMD3<Float>] = []
 }
 
@@ -50,7 +50,7 @@ class TerrainFace {
     
     func construct_mesh() {
         var vertices: [SIMD3<Float>] = []
-        var triangles: [UInt16] = []
+        var triangles: [UInt32] = []
         
         for y in 0..<self.resolution {
             for x in 0..<self.resolution {
@@ -62,13 +62,13 @@ class TerrainFace {
                 vertices.append(shapeGenerator.calculatePointOnPlanet(pointOnUnitSphere: pointOnUnitSphere))
                 
                 if (x != self.resolution - 1) && (y != self.resolution - 1) {
-                    triangles.append(UInt16(index))
-                    triangles.append(UInt16(index + self.resolution))
-                    triangles.append(UInt16(index + self.resolution + 1))
+                    triangles.append(UInt32(index))
+                    triangles.append(UInt32(index + self.resolution))
+                    triangles.append(UInt32(index + self.resolution + 1))
                     
-                    triangles.append(UInt16(index))
-                    triangles.append(UInt16(index + self.resolution + 1))
-                    triangles.append(UInt16(index + 1))
+                    triangles.append(UInt32(index))
+                    triangles.append(UInt32(index + self.resolution + 1))
+                    triangles.append(UInt32(index + 1))
                 }
             }
         }

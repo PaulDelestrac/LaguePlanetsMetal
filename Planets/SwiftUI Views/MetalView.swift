@@ -34,8 +34,9 @@ import SwiftUI
 import MetalKit
 
 struct MetalView: View {
-    let options: Options
+    @Environment(\.options) private var options: Options
     @Binding public var isEditing: Bool
+    @Binding public var isScrolling: Bool
     @State private var metalView = MTKView()
     @State private var gameController: GameController?
     @State private var previousTranslation = CGSize.zero
@@ -46,11 +47,12 @@ struct MetalView: View {
             gameController: gameController,
             metalView: $metalView,
             options: options,
-            isEditing: $isEditing
+            isEditing: $isEditing,
+            isScrolling: $isScrolling
         )
         .onAppear {
             gameController = GameController(
-                metalView: metalView, options: options, isEditing: isEditing)
+                metalView: metalView, options: options, isEditing: isEditing, isScrolling: isScrolling)
         }
         .gesture(DragGesture(minimumDistance: 0)
             .onChanged { value in
@@ -92,6 +94,7 @@ struct MetalViewRepresentable: ViewRepresentable {
     @Binding var metalView: MTKView
     let options: Options
     @Binding var isEditing: Bool
+    @Binding var isScrolling: Bool
     
 #if os(macOS)
     func makeNSView(context: Context) -> some NSView {
@@ -113,13 +116,16 @@ struct MetalViewRepresentable: ViewRepresentable {
     func updateMetalView() {
         gameController?.options = options
         gameController?.isEditing = isEditing
+        gameController?.isScrolling = isScrolling
     }
 }
 
 #Preview {
     @Previewable @State var testBool: Bool = false
+    @Previewable @State var options = Options()
+    @Previewable @State var isScrolling: Bool = false
     VStack {
-        MetalView(options: Options(), isEditing: $testBool)
+        MetalView(isEditing: $testBool, isScrolling: $isScrolling)
         Text("Metal View")
     }
 }

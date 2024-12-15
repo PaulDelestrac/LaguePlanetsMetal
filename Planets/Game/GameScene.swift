@@ -62,4 +62,15 @@ struct GameScene {
         }
         camera.update(deltaTime: deltaTime)
     }
+    
+    mutating func update(deltaTime: Float, isScrolling: Bool) {
+        let input = InputController.shared
+        if input.keysPressed.contains(.one) {
+            camera.transform = Transform()
+        }
+        if input.keysPressed.contains(.two) {
+            camera.transform = defaultView
+        }
+        camera.update(deltaTime: deltaTime, isScrolling: isScrolling)
+    }
 }

@@ -37,6 +37,7 @@ protocol Camera: Transformable {
     var viewMatrix: float4x4 { get }
     mutating func update(size: CGSize)
     mutating func update(deltaTime: Float)
+    mutating func update(deltaTime: Float, isScrolling: Bool)
 }
 
 struct FPCamera: Camera {
@@ -66,6 +67,10 @@ struct FPCamera: Camera {
         let transform = updateInput(deltaTime: deltaTime)
         rotation += transform.rotation
         position += transform.position
+    }
+    
+    mutating func update(deltaTime: Float, isScrolling: Bool) {
+        update(deltaTime: deltaTime)
     }
 }
 
@@ -124,6 +129,30 @@ struct ArcballCamera: Camera {
         let rotatedVector = rotateMatrix * distanceVector
         position = target + rotatedVector.xyz
     }
+    
+    mutating func update(deltaTime: Float, isScrolling: Bool) {
+        let input = InputController.shared
+        let scrollSensitivity = Settings.mouseScrollSensitivity
+        if !isScrolling {
+            distance -= (input.mouseScroll.x + input.mouseScroll.y)
+            * scrollSensitivity
+        }
+        distance = min(maxDistance, distance)
+        distance = max(minDistance, distance)
+        input.mouseScroll = .zero
+        if input.leftMouseDown {
+            let sensitivity = Settings.mousePanSensitivity
+            rotation.x += input.mouseDelta.y * sensitivity
+            rotation.y += input.mouseDelta.x * sensitivity
+            rotation.x = max(-.pi / 2, min(rotation.x, .pi / 2))
+        }
+        input.mouseDelta = .zero
+        let rotateMatrix = float4x4(
+            rotationYXZ: [-rotation.x, rotation.y, 0])
+        let distanceVector = float4(0, 0, -distance, 0)
+        let rotatedVector = rotateMatrix * distanceVector
+        position = target + rotatedVector.xyz
+    }
 }
 
 struct OrthographicCamera: Camera, Movement {
@@ -158,5 +187,9 @@ struct OrthographicCamera: Camera, Movement {
         let zoom = input.mouseScroll.x + input.mouseScroll.y
         viewSize -= CGFloat(zoom)
         input.mouseScroll = .zero
+    }
+    
+    mutating func update(deltaTime: Float, isScrolling: Bool) {
+        update(deltaTime: deltaTime)
     }
 }
