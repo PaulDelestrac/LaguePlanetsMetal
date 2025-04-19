@@ -30,8 +30,8 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import SwiftUI
 import MetalKit
+import SwiftUI
 
 struct MetalView: View {
     @Environment(\.options) private var options: Options
@@ -41,7 +41,7 @@ struct MetalView: View {
     @State private var gameController: GameController?
     @State private var previousTranslation = CGSize.zero
     @State private var previousScroll: CGFloat = 1
-    
+
     var body: some View {
         MetalViewRepresentable(
             gameController: gameController,
@@ -52,9 +52,10 @@ struct MetalView: View {
         )
         .onAppear {
             gameController = GameController(
-                metalView: metalView, options: options, isEditing: isEditing, isScrolling: isScrolling)
+                metalView: metalView, options: options, isEditing: isEditing,
+                isScrolling: isScrolling)
         }
-        .gesture(DragGesture(minimumDistance: 0)
+        /*.gesture(DragGesture(minimumDistance: 0)
             .onChanged { value in
                 InputController.shared.touchLocation = value.location
                 InputController.shared.touchDelta = CGSize(
@@ -79,14 +80,14 @@ struct MetalView: View {
             }
             .onEnded {_ in
                 previousScroll = 1
-            })
+            })*/
     }
 }
 
 #if os(macOS)
-typealias ViewRepresentable = NSViewRepresentable
+    typealias ViewRepresentable = NSViewRepresentable
 #elseif os(iOS)
-typealias ViewRepresentable = UIViewRepresentable
+    typealias ViewRepresentable = UIViewRepresentable
 #endif
 
 struct MetalViewRepresentable: ViewRepresentable {
@@ -95,24 +96,24 @@ struct MetalViewRepresentable: ViewRepresentable {
     let options: Options
     @Binding var isEditing: Bool
     @Binding var isScrolling: Bool
-    
-#if os(macOS)
-    func makeNSView(context: Context) -> some NSView {
-        metalView
-    }
-    func updateNSView(_ uiView: NSViewType, context: Context) {
-        updateMetalView()
-    }
-#elseif os(iOS)
-    func makeUIView(context: Context) -> MTKView {
-        metalView
-    }
-    
-    func updateUIView(_ uiView: MTKView, context: Context) {
-        updateMetalView()
-    }
-#endif
-    
+
+    #if os(macOS)
+        func makeNSView(context: Context) -> some NSView {
+            metalView
+        }
+        func updateNSView(_ uiView: NSViewType, context: Context) {
+            updateMetalView()
+        }
+    #elseif os(iOS)
+        func makeUIView(context: Context) -> MTKView {
+            metalView
+        }
+
+        func updateUIView(_ uiView: MTKView, context: Context) {
+            updateMetalView()
+        }
+    #endif
+
     func updateMetalView() {
         gameController?.options = options
         gameController?.isEditing = isEditing

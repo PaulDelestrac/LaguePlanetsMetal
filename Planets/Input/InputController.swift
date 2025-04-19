@@ -59,6 +59,7 @@ class InputController {
     
     private init() {
         let center = NotificationCenter.default
+        /*
         center.addObserver(
             forName: .GCKeyboardDidConnect,
             object: nil,
@@ -76,7 +77,7 @@ class InputController {
 #if os(macOS)
         NSEvent.addLocalMonitorForEvents(
             matching: [.keyUp, .keyDown]) { _ in nil }
-#endif
+#endif*/
         center.addObserver(
             forName: .GCMouseDidConnect,
             object: nil,

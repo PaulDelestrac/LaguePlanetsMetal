@@ -14,7 +14,7 @@ struct SettingsView: View {
     @State var refreshList = false
     @State var refreshEye = false
     @State var refreshMask = false
-    
+
     var body: some View {
         @Bindable var options = options
         VStack {
@@ -66,10 +66,10 @@ struct SettingsView: View {
                 .padding(.horizontal)
                 .listStyle(InsetListStyle())
                 .id(refreshList)
-            
+
         }
     }
-    
+
     private var layerListView: some View {
         if #available(macOS 15.0, *) {
             return ScrollView {
@@ -86,14 +86,14 @@ struct SettingsView: View {
                 }
             }
         } else {
-            return  List {
+            return List {
                 ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
                     layerSection(index)
                 }
             }
         }
     }
-    
+
     private func layerSection(_ index: Int) -> some View {
         @Bindable var options = options
         return Section("Layer #\(index)") {

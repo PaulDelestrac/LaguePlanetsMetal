@@ -33,18 +33,105 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var options: Options = Options()
+    @Environment(\.modelContext) private var context
+    @State private var selectedOptions: Options?
+    @State private var selectedOptionsID: UUID?
+    @State var optionsList: [Options]
     @State public var isEditing = false
     @State public var isScrolling = false
+    @State var isPresented = true
+
+    @State var temporaryText = ""
+    @FocusState var isFocused: Bool
+
     var body: some View {
-        HStack {
-            MetalView(isEditing: $isEditing, isScrolling: $isScrolling)
-                .border(Color.black, width: 2)
-                .environment(\.options, options)
-            SettingsView(isScrolling: $isScrolling)
-                .frame(width: 250)
-                .environment(\.options, options)
+        NavigationSplitView {
+            PlanetsListView(
+                selectedOptionsID: $selectedOptionsID,
+                selectedOptions: $selectedOptions,
+                optionsList: $optionsList
+            )
+            Spacer()
+            HStack {
+                Button {
+                    let shapeSettings = ShapeSettings(name: "New Planet")
+                    optionsList.append(Options(shapeSettings: shapeSettings))
+                } label: {
+                    Label {
+                        //Text("Add Planet")
+                    } icon: {
+                        Image("custom.globe.americas.fill.badge.plus")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                    }
+                }
+                .buttonStyle(.borderless)
+                Spacer()
+            }
+            .padding(10)
+        } detail: {
+            VStack {
+                if selectedOptions != nil {
+                    MetalView(isEditing: $isEditing, isScrolling: $isScrolling)
+                        .border(Color.black, width: 2)
+                        .environment(\.options, selectedOptions!)
+                } else {
+                    Text("Choose a planet or create a new one!")
+                }
+            }
         }
+        .toolbar {
+            if selectedOptionsID != nil {
+                Button {
+                    optionsList.removeAll(where: { $0.id == selectedOptionsID })
+                    selectedOptions = nil
+                    selectedOptionsID = nil
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .keyboardShortcut(.delete, modifiers: [])
+            }
+        }
+        .toolbarRole(.editor)
+        .navigationTitle(
+            Text("\(selectedOptions?.shapeSettings.name ?? "")")
+        )
+        .inspector(isPresented: $isPresented) {
+            if selectedOptions != nil {
+                SettingsView(isScrolling: $isScrolling)
+                    .frame(width: 250)
+                    .environment(\.options, selectedOptions!)
+                    .toolbar {
+                        ToolbarItemGroup {
+                            Spacer()
+                            Button {
+                                isPresented.toggle()
+                            } label: {
+                                Image(systemName: "sidebar.right")
+                            }
+                        }
+                    }
+            } else {
+                Text("No planet selected!")
+                    .toolbar {
+                        ToolbarItemGroup {
+                            Spacer()
+                            Button {
+                                isPresented.toggle()
+                            } label: {
+                                Image(systemName: "sidebar.right")
+                            }
+                        }
+                    }
+            }
+        }
+    }
+}
+
+extension ContentView {
+    private func deleteOptions(offsets: IndexSet) {
+        optionsList.remove(atOffsets: offsets)
     }
 }
 
@@ -59,7 +146,8 @@ private struct OptionsEnvironmentKey: EnvironmentKey {
     static let defaultValue: Options = Options()
 }
 
-
 #Preview {
-    ContentView()
+    @Previewable @State var settings = [ShapeSettings(name: "")]
+    @Previewable @State var options = Options()
+    ContentView(optionsList: [])
 }

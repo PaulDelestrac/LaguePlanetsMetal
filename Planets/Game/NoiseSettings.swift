@@ -7,9 +7,9 @@
 
 import Foundation
 
-class NoiseSettings {
+class NoiseSettings: Codable {
     
-    enum FilterType : String, CaseIterable, Identifiable {
+    enum FilterType : String, CaseIterable, Identifiable, Codable  {
         var id: Self { self }
         
         case Simple
