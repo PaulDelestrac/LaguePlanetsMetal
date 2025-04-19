@@ -42,6 +42,7 @@ class GameController: NSObject {
     var isEditing: Bool
     var isScrolling: Bool
     var isWindowDragging: Bool = false
+    var isWindowResizing: Bool = false
 
     init(metalView: MTKView, options: Options, isEditing: Bool = false, isScrolling: Bool = false) {
         renderer = Renderer(metalView: metalView, options: options)
@@ -64,6 +65,18 @@ class GameController: NSObject {
             name: NSNotification.Name("windowDidDrag"),
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowWillResize),
+            name: NSNotification.Name("windowWillResize"),
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidResize),
+            name: NSNotification.Name("windowDidResize"),
+            object: nil
+        )
 
         metalView.delegate = self
         fps = Double(metalView.preferredFramesPerSecond)
@@ -80,6 +93,12 @@ class GameController: NSObject {
 
     @objc func windowDidDrag() {
         self.isWindowDragging = false
+    }
+    @objc func windowWillResize() {
+        self.isWindowResizing = true
+    }
+    @objc func windowDidResize() {
+        self.isWindowResizing = false
     }
 }
 
@@ -99,7 +118,7 @@ extension GameController: MTKViewDelegate {
         lastTime = currentTime
 
         if !options.shapeSettings.isChanging && !options.shapeSettings.isColorChanging
-            && !self.isWindowDragging
+            && !self.isWindowDragging && !self.isWindowResizing
         {
             scene.update(deltaTime: Float(deltaTime), isScrolling: self.isScrolling)
         }

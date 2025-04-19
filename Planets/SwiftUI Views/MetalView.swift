@@ -106,6 +106,7 @@ struct MetalViewRepresentable: ViewRepresentable {
             var dragDebounceTimer: Timer?
             var mouseMonitor: Any?
             var isDragging: Bool = false
+            var isResizing: Bool = false
 
             init(_ parent: MetalViewRepresentable) {
                 self.parent = parent
@@ -139,6 +140,18 @@ struct MetalViewRepresentable: ViewRepresentable {
                     name: NSNotification.Name("windowWillDrag"), object: nil)
             }
             func windowDidMove(_ notification: Notification) {}
+            func windowWillStartLiveResize(_ notification: Notification) {
+                dragDebounceTimer?.invalidate()
+                isResizing = true
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("windowWillResize"), object: nil)
+            }
+            func windowDidEndLiveResize(_ notification: Notification) {
+                dragDebounceTimer?.invalidate()
+                isResizing = false
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("windowDidResize"), object: nil)
+            }
         }
         func makeNSView(context: Context) -> some NSView {
             DispatchQueue.main.async {
