@@ -44,7 +44,7 @@ class Planet: Transformable {
         self.device = device
         self.shapeSettings = shapeSettings
         self.shapeGenerator = ShapeGenerator(settings: self.shapeSettings)
-        self.generateMesh()
+        self.generateUnifiedMesh()
 
         // Initialize random colors
         for _ in self.rawMesh.vertices {
@@ -101,36 +101,118 @@ class Planet: Transformable {
         self.normalBuffer = normalBuffer
     }
 
-    func generateMesh() {
-        self.terrainFaces = []
+    func generateUnifiedMesh() {
+        // Create empty data structures
+        var allVertices: [SIMD3<Float>] = []
+        var allIndices: [UInt32] = []
+        var allNormals: [SIMD3<Float>] = []
 
-        // Create the terrain faces
-        for i in 0..<directions.count {
-            let renderFace: Bool =
+        // Create maps for edge sharing
+        var vertexMap: [SIMD3<Int>: UInt32] = [:]
+        let epsilon: Float = 0.00001
+        let scale: Int = Int(1.0 / epsilon)
+
+        // Track the global vertex count
+        var globalVertexCount: UInt32 = 0
+
+        // Generate faces one by one
+        for (faceIndex, localUp) in directions.enumerated() {
+            let renderFace =
                 (shapeSettings.faceRenderMask == FaceRenderMask.All)
-                || (shapeSettings.faceRenderMask.rawValue - 1 == i)
-            if renderFace {
-                self.terrainFaces.append(
-                    TerrainFace(
-                        shapeGenerator: self.shapeGenerator,
-                        resolution: self.shapeSettings.resolution,
-                        localUp: directions[i]))
-            }
-        }
+                || (shapeSettings.faceRenderMask.rawValue - 1 == faceIndex)
 
-        // Generate the mesh for each face
-        self.rawMesh = RawMesh(vertices: [], indices: [], normals: [])
-        for terrainFace in self.terrainFaces {
-            terrainFace.construct_mesh(device: self.device)
-            let numberOfIndices = self.rawMesh.vertices.count
-            let shiftedIndices = terrainFace.mesh.indices.map { UInt32(numberOfIndices) + $0 }
-            self.rawMesh.indices.append(contentsOf: shiftedIndices)
-            self.rawMesh.vertices.append(contentsOf: terrainFace.mesh.vertices)
-            self.rawMesh.normals.append(contentsOf: terrainFace.mesh.normals)
+            if !renderFace { continue }
+
+            // Generate the axes the same way TerrainFace does
+            var axisA = SIMD3<Float>(x: 0, y: 1, z: 0)
+            if abs(dot(localUp, axisA)) > 0.9 {
+                axisA = SIMD3<Float>(x: 1, y: 0, z: 0)
+            }
+            let axisB = normalize(cross(localUp, axisA))
+            axisA = normalize(cross(axisB, localUp))
+
+            let resolution = shapeSettings.resolution
+
+            // Create local arrays for this face
+            var faceVertices: [SIMD3<Float>] = []
+            var faceIndices: [UInt32] = []
+            var localToGlobalIndexMap: [Int: UInt32] = [:]
+
+            // Generate vertices
+            for y in 0..<resolution {
+                for x in 0..<resolution {
+                    let localIndex = y * resolution + x
+                    let percent = SIMD2<Float>(x: Float(x), y: Float(y)) / Float(resolution - 1)
+
+                    // Calculate position the same way TerrainFace does
+                    let pointOnUnitCube =
+                        localUp + (Float(percent.x) - 0.5) * 2 * axisA + (Float(percent.y) - 0.5)
+                        * 2 * axisB
+                    let pointOnUnitSphere = normalize(pointOnUnitCube)
+                    let vertexPosition = shapeGenerator.calculatePointOnPlanet(
+                        pointOnUnitSphere: pointOnUnitSphere)
+
+                    // Check if this vertex already exists (shared between faces)
+                    let key = SIMD3<Int>(
+                        x: Int(vertexPosition.x * Float(scale)),
+                        y: Int(vertexPosition.y * Float(scale)),
+                        z: Int(vertexPosition.z * Float(scale))
+                    )
+
+                    if let existingGlobalIndex = vertexMap[key] {
+                        // Reuse existing vertex in another face
+                        localToGlobalIndexMap[localIndex] = existingGlobalIndex
+                    } else {
+                        // Add new vertex
+                        let globalIndex = globalVertexCount
+                        vertexMap[key] = globalIndex
+                        localToGlobalIndexMap[localIndex] = globalIndex
+                        faceVertices.append(vertexPosition)
+                        globalVertexCount += 1
+                    }
+                }
+            }
+
+            // Create triangles using CONSISTENT winding order
+            for y in 0..<(resolution - 1) {
+                for x in 0..<(resolution - 1) {
+                    if let i00 = localToGlobalIndexMap[y * resolution + x],
+                        let i10 = localToGlobalIndexMap[y * resolution + (x + 1)],
+                        let i01 = localToGlobalIndexMap[(y + 1) * resolution + x],
+                        let i11 = localToGlobalIndexMap[(y + 1) * resolution + (x + 1)]
+                    {
+
+                        // Use single consistent winding order for ALL faces
+                        faceIndices.append(i00)
+                        faceIndices.append(i10)
+                        faceIndices.append(i11)
+
+                        faceIndices.append(i00)
+                        faceIndices.append(i11)
+                        faceIndices.append(i01)
+                    } else {
+                        print("Missing vertex at face \(faceIndex), position (\(x), \(y))")
+                    }
+                }
+            }
+
+            // Append face data to the unified arrays
+            allVertices.append(contentsOf: faceVertices)
+            allIndices.append(contentsOf: faceIndices)
         }
 
         // Calculate normals
-        mergeVerticesAndRecalculateNormals()
+        allNormals = calculateVertexNormalsGPU(
+            device: self.device,
+            vertices: allVertices,
+            indices: allIndices
+        )
+
+        // Set the results
+        self.rawMesh.vertices = allVertices
+        self.rawMesh.indices = allIndices
+        self.rawMesh.normals = allNormals
+        self.normals = allNormals
     }
 
     func updateColor(_ color: SIMD3<Float>) {
@@ -152,7 +234,7 @@ class Planet: Transformable {
     func updateShape(settings: ShapeSettings) {
         self.shapeSettings = settings
         self.shapeGenerator = ShapeGenerator(settings: settings)
-        self.generateMesh()
+        self.generateUnifiedMesh()
         self.vertexBuffer = self.device.makeBuffer(
             bytes: &self.rawMesh.vertices,
             length: MemoryLayout<SIMD3<Float>>.stride * self.rawMesh.vertices.count, options: [])!
@@ -170,47 +252,6 @@ class Planet: Transformable {
         encoder.setVertexBuffer(self.vertexBuffer, offset: 0, index: Position.index)
         encoder.setVertexBuffer(self.colorBuffer, offset: 0, index: Color.index)
         encoder.setVertexBuffer(self.normalBuffer, offset: 0, index: Normal.index)
-    }
-
-    func mergeVerticesAndRecalculateNormals() {
-        let epsilon: Float = 0.00001
-        let precision: Int = Int(1.0 / epsilon)
-
-        var uniqueVertices: [SIMD3<Float>] = []
-        var newIndices: [UInt32] = []
-        var vertexKeyMap: [String: Int] = [:]
-        var vertexMapping: [Int: Int] = [:]
-
-        for (index, vertex) in self.rawMesh.vertices.enumerated() {
-            let vertexKey =
-                "\(Int(vertex.x * Float(precision)))/\(Int(vertex.y * Float(precision)))/\(Int(vertex.z * Float(precision)))"
-
-            if let existingIndex = vertexKeyMap[vertexKey] {
-                vertexMapping[index] = existingIndex
-            } else {
-                let newIndex = uniqueVertices.count
-                vertexKeyMap[vertexKey] = newIndex
-                vertexMapping[index] = newIndex
-                uniqueVertices.append(vertex)
-            }
-        }
-
-        for oldIndex in self.rawMesh.indices {
-            if let newIndex = vertexMapping[Int(oldIndex)] {
-                newIndices.append(UInt32(newIndex))
-            }
-        }
-
-        self.rawMesh.vertices = uniqueVertices
-        self.rawMesh.indices = newIndices
-
-        self.normals = calculateVertexNormalsGPU(
-            device: self.device,
-            vertices: self.rawMesh.vertices,
-            indices: self.rawMesh.indices
-        )
-
-        self.rawMesh.normals = self.normals
     }
 }
 
