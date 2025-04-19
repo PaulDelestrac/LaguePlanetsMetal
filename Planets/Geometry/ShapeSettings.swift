@@ -15,32 +15,34 @@ import Foundation
     var noiseLayers: [NoiseLayer] = [NoiseLayer]()
     var isChanging = false
     var needsUpdate: Bool = true
+    var isColorChanging = false
+    var colorNeedsUpdate: Bool = true
     var faceRenderMask: Planet.FaceRenderMask = .All
-    
+
     init() {
         self.id = UUID()
     }
-    
+
     init(name: String) {
         self.id = UUID()
         self.name = name
     }
-    
+
     init(id: UUID, name: String) {
         self.id = id
         self.name = name
     }
-    
+
     init(planetRadius: Float) {
         self.id = UUID()
         self.planetRadius = planetRadius
     }
-    
+
     func addNoiseLayer() {
         self.noiseLayers.append(NoiseLayer())
     }
-    
-    class NoiseLayer : Identifiable, Codable {
+
+    class NoiseLayer: Identifiable, Codable {
         var id: UUID = UUID()
         var noiseSettings: NoiseSettings = NoiseSettings()
         var enabled: Bool = true
