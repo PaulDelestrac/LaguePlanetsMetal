@@ -15,6 +15,7 @@
 		14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */; };
 		14CAE3442D06503700A4CECC /* Noise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3432D06503700A4CECC /* Noise.swift */; };
 		14D78F122DB3EF41008917B9 /* PlanetsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14D78F112DB3EF41008917B9 /* PlanetsListView.swift */; };
+		14D78F162DB41125008917B9 /* Normals.metal in Sources */ = {isa = PBXBuildFile; fileRef = 14D78F152DB41125008917B9 /* Normals.metal */; };
 		14E127342D077F6500E12420 /* SimpleNoiseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E127332D077F6500E12420 /* SimpleNoiseFilter.swift */; };
 		14E127362D0786F700E12420 /* NoiseSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E127352D0786F700E12420 /* NoiseSettings.swift */; };
 		14E508BC2D08E17E004B4375 /* RidgidNoiseFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E508BB2D08E17E004B4375 /* RidgidNoiseFilter.swift */; };
@@ -55,6 +56,7 @@
 		14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeGenerator.swift; sourceTree = "<group>"; };
 		14CAE3432D06503700A4CECC /* Noise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Noise.swift; sourceTree = "<group>"; };
 		14D78F112DB3EF41008917B9 /* PlanetsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetsListView.swift; sourceTree = "<group>"; };
+		14D78F152DB41125008917B9 /* Normals.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Normals.metal; sourceTree = "<group>"; };
 		14E127332D077F6500E12420 /* SimpleNoiseFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleNoiseFilter.swift; sourceTree = "<group>"; };
 		14E127352D0786F700E12420 /* NoiseSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseSettings.swift; sourceTree = "<group>"; };
 		14E508BB2D08E17E004B4375 /* RidgidNoiseFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RidgidNoiseFilter.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 				14E8CE772D04E2EA00AE0D67 /* Lighting.metal */,
 				14E8CE782D04E2EA00AE0D67 /* ShaderDefs.h */,
 				14E8CE792D04E2EA00AE0D67 /* Vertex.metal */,
+				14D78F152DB41125008917B9 /* Normals.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -320,6 +323,7 @@
 				140F64762D04E3FB00C89262 /* Planet.swift in Sources */,
 				14E8CEA12D04E2EA00AE0D67 /* MetalView.swift in Sources */,
 				14E8CEA32D04E2EA00AE0D67 /* DebugLights.metal in Sources */,
+				14D78F162DB41125008917B9 /* Normals.metal in Sources */,
 				14E8CEA42D04E2EA00AE0D67 /* DebugLights.swift in Sources */,
 				14E508C22D08EBA6004B4375 /* NoiseLayerSettingsView.swift in Sources */,
 				14E8CEA52D04E2EA00AE0D67 /* MathLibrary.swift in Sources */,

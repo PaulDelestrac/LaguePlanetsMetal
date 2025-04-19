@@ -52,7 +52,7 @@ class TerrainFace {
         self.axisB = SIMD3(x: localUp.z, y: localUp.x, z: localUp.y)
     }
 
-    func construct_mesh() {
+    func construct_mesh(device: MTLDevice) {
         var vertices: [SIMD3<Float>] = []
         var triangles: [UInt32] = []
 
@@ -94,6 +94,10 @@ class TerrainFace {
 
         self.mesh.vertices = vertices
         self.mesh.indices = triangles
-        self.mesh.normals = calculateVertexNormals(vertices: vertices, indices: triangles)
+        self.mesh.normals = calculateVertexNormalsGPU(
+            device: device,
+            vertices: vertices,
+            indices: triangles
+        )
     }
 }

@@ -121,7 +121,7 @@ class Planet: Transformable {
         // Generate the mesh for each face
         self.rawMesh = RawMesh(vertices: [], indices: [], normals: [])
         for terrainFace in self.terrainFaces {
-            terrainFace.construct_mesh()
+            terrainFace.construct_mesh(device: self.device)
             let numberOfIndices = self.rawMesh.vertices.count
             let shiftedIndices = terrainFace.mesh.indices.map { UInt32(numberOfIndices) + $0 }
             self.rawMesh.indices.append(contentsOf: shiftedIndices)
@@ -193,20 +193,6 @@ class Planet: Transformable {
                 vertexMapping[index] = newIndex
                 uniqueVertices.append(vertex)
             }
-            /*
-            var found = false
-            for (uniqueIndex, uniqueVertex) in uniqueVertices.enumerated() {
-                if distance(vertex, uniqueVertex) < epsilon {
-                    vertexMapping[index] = uniqueIndex
-                    found = true
-                    break
-                }
-            }
-
-            if !found {
-                vertexMapping[index] = uniqueVertices.count
-                uniqueVertices.append(vertex)
-            }*/
         }
 
         for oldIndex in self.rawMesh.indices {
@@ -218,8 +204,12 @@ class Planet: Transformable {
         self.rawMesh.vertices = uniqueVertices
         self.rawMesh.indices = newIndices
 
-        self.normals = calculateVertexNormals(
-            vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
+        self.normals = calculateVertexNormalsGPU(
+            device: self.device,
+            vertices: self.rawMesh.vertices,
+            indices: self.rawMesh.indices
+        )
+
         self.rawMesh.normals = self.normals
     }
 }
@@ -260,7 +250,7 @@ extension Planet {
 // Calculate vertex normals for a list of vertices assuming triangular mesh
 func calculateVertexNormals(vertices: [SIMD3<Float>], indices: [UInt32]) -> [SIMD3<Float>] {
     // Initialize normal vectors with zero
-    var vertexNormals = [SIMD3<Float>](repeating: float3(0, 0, 0), count: vertices.count)
+    var vertexNormals = [SIMD3<Float>](repeating: SIMD3<Float>(0, 0, 0), count: vertices.count)
 
     // Calculate face normals and accumulate for each vertex
     for i in stride(from: 0, to: indices.count, by: 3) {
@@ -287,4 +277,94 @@ func calculateVertexNormals(vertices: [SIMD3<Float>], indices: [UInt32]) -> [SIM
     return vertexNormals.map { vertex in
         return normalize(vertex)
     }
+}
+
+func calculateVertexNormalsGPU(device: MTLDevice, vertices: [SIMD3<Float>], indices: [UInt32])
+    -> [SIMD3<Float>]
+{
+    let vertexCount = vertices.count
+    let triangleCount = indices.count / 3
+
+    var normals = [SIMD3<Float>](repeating: SIMD3<Float>(0, 0, 0), count: vertexCount)
+
+    if vertexCount == 0 || triangleCount == 0 {
+        print("No vertices or triangles to calculate normals")
+        return normals
+    }
+
+    // Create buffers
+    guard
+        let vertexBuffer = device.makeBuffer(
+            bytes: vertices, length: MemoryLayout<SIMD3<Float>>.stride * vertexCount),
+        let indexBuffer = device.makeBuffer(
+            bytes: indices, length: MemoryLayout<UInt32>.stride * indices.count),
+        let faceNormalBuffer = device.makeBuffer(
+            length: MemoryLayout<SIMD3<Float>>.stride * triangleCount),
+        let vertexNormalBuffer = device.makeBuffer(
+            length: MemoryLayout<SIMD3<Float>>.stride * vertexCount)
+    else {
+        print("Unable to create vertex buffer, falling back to CPU calculation")
+        return calculateVertexNormals(vertices: vertices, indices: indices)
+    }
+
+    // Create a compute pipeline
+    guard let library = device.makeDefaultLibrary(),
+        let faceNormalKernel = library.makeFunction(name: "computeFaceNormals"),
+        let vertexNormalKernel = library.makeFunction(name: "computeVertexNormals"),
+        let facePipelineState = try? device.makeComputePipelineState(function: faceNormalKernel),
+        let vertexPipelineState = try? device.makeComputePipelineState(function: vertexNormalKernel)
+    else {
+        print("Unable to create compute pipeline state, falling back to CPU calculation")
+        return calculateVertexNormals(vertices: vertices, indices: indices)
+    }
+
+    // Create a command queue
+    let commandQueue = device.makeCommandQueue()!
+    let commandBuffer = commandQueue.makeCommandBuffer()!
+
+    let faceEncoder: any MTLComputeCommandEncoder = commandBuffer.makeComputeCommandEncoder()!
+    faceEncoder.setComputePipelineState(facePipelineState)
+    faceEncoder.setBuffer(vertexBuffer, offset: 0, index: 0)
+    faceEncoder.setBuffer(indexBuffer, offset: 0, index: 1)
+    faceEncoder.setBuffer(faceNormalBuffer, offset: 0, index: 2)
+
+    var triangleCountUInt = UInt32(triangleCount)
+    faceEncoder.setBytes(
+        &triangleCountUInt, length: MemoryLayout<UInt32>.size, index: 3)
+
+    let faceThreadGroupSize = MTLSize(width: 64, height: 1, depth: 1)
+    let faceThreadGroups = MTLSize(
+        width: (triangleCount + faceThreadGroupSize.width - 1) / faceThreadGroupSize.width,
+        height: 1, depth: 1)
+    faceEncoder.dispatchThreadgroups(
+        faceThreadGroups, threadsPerThreadgroup: faceThreadGroupSize)
+    faceEncoder.endEncoding()
+
+    let vertexEncoder: any MTLComputeCommandEncoder = commandBuffer.makeComputeCommandEncoder()!
+    vertexEncoder.setComputePipelineState(vertexPipelineState)
+    vertexEncoder.setBuffer(indexBuffer, offset: 0, index: 0)
+    vertexEncoder.setBuffer(faceNormalBuffer, offset: 0, index: 1)
+    vertexEncoder.setBuffer(vertexNormalBuffer, offset: 0, index: 2)
+
+    vertexEncoder.setBytes(&triangleCountUInt, length: MemoryLayout<UInt32>.size, index: 3)
+    var vertexCountUInt = UInt32(vertexCount)
+    vertexEncoder.setBytes(
+        &vertexCountUInt, length: MemoryLayout<UInt32>.size, index: 4)
+
+    let vertexThreadGroupSize = MTLSize(width: 64, height: 1, depth: 1)
+    let vertexThreadGroups = MTLSize(
+        width: (vertexCount + vertexThreadGroupSize.width - 1) / vertexThreadGroupSize.width,
+        height: 1, depth: 1)
+    vertexEncoder.dispatchThreadgroups(
+        vertexThreadGroups, threadsPerThreadgroup: vertexThreadGroupSize)
+    vertexEncoder.endEncoding()
+
+    commandBuffer.commit()
+    commandBuffer.waitUntilCompleted()
+
+    // Copy the results back to the host
+    // normalBuffer.contents().copyMemory(
+    //     to: &normals, byteCount: MemoryLayout<SIMD3<Float>>.stride * vertexCount)
+    memcpy(&normals, vertexNormalBuffer.contents(), MemoryLayout<SIMD3<Float>>.stride * vertexCount)
+    return normals
 }

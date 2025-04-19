@@ -38,50 +38,51 @@ class Renderer: NSObject {
     static var device: MTLDevice!
     static var commandQueue: MTLCommandQueue!
     static var library: MTLLibrary!
-    
+
     var pipelineState: MTLRenderPipelineState!
     let depthStencilState: MTLDepthStencilState?
-    
+
     var uniforms = Uniforms()
     var params = Params()
-    
+
     var planet: Planet
-    
+
     var needsUpdate: Bool = true
     var oldOptions: Options = Options()
-    
+
     init(metalView: MTKView, options: Options) {
         guard
             let device = MTLCreateSystemDefaultDevice(),
-            let commandQueue = device.makeCommandQueue() else {
+            let commandQueue = device.makeCommandQueue()
+        else {
             fatalError("GPU not available")
         }
         Self.device = device
         Self.commandQueue = commandQueue
         metalView.device = device
-        
+
         self.planet = Planet(device: device, shapeSettings: options.shapeSettings)
-        
+
         // create the shader function library
         let library = device.makeDefaultLibrary()
         Self.library = library
         let vertexFunction = library?.makeFunction(name: "vertex_main")
         let fragmentFunction =
-        library?.makeFunction(name: "fragment_main")
-        
+            library?.makeFunction(name: "fragment_main")
+
         // create the pipeline state object
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.vertexFunction = vertexFunction
         pipelineDescriptor.fragmentFunction = fragmentFunction
         pipelineDescriptor.colorAttachments[0].pixelFormat =
-        metalView.colorPixelFormat
+            metalView.colorPixelFormat
         pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         pipelineDescriptor.vertexDescriptor =
-        MTLVertexDescriptor.defaultLayout
+            MTLVertexDescriptor.defaultLayout
         do {
             pipelineState =
-            try device.makeRenderPipelineState(
-                descriptor: pipelineDescriptor)
+                try device.makeRenderPipelineState(
+                    descriptor: pipelineDescriptor)
         } catch {
             fatalError(error.localizedDescription)
         }
@@ -97,7 +98,7 @@ class Renderer: NSObject {
             metalView,
             drawableSizeWillChange: metalView.drawableSize)
     }
-    
+
     static func buildDepthStencilState() -> MTLDepthStencilState? {
         let descriptor = MTLDepthStencilDescriptor()
         descriptor.depthCompareFunction = .less
@@ -113,58 +114,61 @@ extension Renderer {
         drawableSizeWillChange size: CGSize
     ) {
     }
-    
+
     func updateUniforms(scene: GameScene) {
         uniforms.viewMatrix = scene.camera.viewMatrix
         uniforms.projectionMatrix = scene.camera.projectionMatrix
         params.lightCount = UInt32(scene.lighting.lights.count)
         params.cameraPosition = scene.camera.position
     }
-    
+
     func draw(scene: GameScene, in view: MTKView, options: Options) {
         guard
             let commandBuffer = Self.commandQueue.makeCommandBuffer(),
             let descriptor = view.currentRenderPassDescriptor,
             let renderEncoder =
                 commandBuffer.makeRenderCommandEncoder(
-                    descriptor: descriptor) else {
+                    descriptor: descriptor)
+        else {
             return
         }
-        
+
         updateUniforms(scene: scene)
-        
+
         renderEncoder.setDepthStencilState(depthStencilState)
         renderEncoder.setRenderPipelineState(pipelineState)
-        
+
         var lights = scene.lighting.lights
         renderEncoder.setFragmentBytes(
             &lights,
             length: MemoryLayout<Light>.stride * lights.count,
             index: LightBuffer.index)
-        
+
         self.planet.updateColor(options.color)
         if options.shapeSettings.isChanging || options.shapeSettings.needsUpdate {
             self.planet.updateShape(settings: options.shapeSettings)
             oldOptions.shapeSettings = options.shapeSettings
             options.shapeSettings.needsUpdate = false
         }
-        
+
         //renderEncoder.setTriangleFillMode(.lines)
-        
+
         self.planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
-        
+
         // Debug lights
         /*DebugLights.draw(
          lights: scene.lighting.lights,
          encoder: renderEncoder,
          uniforms: uniforms)*/
-         
+
         // Debug normals
         //assert(self.planet.normals.count == self.planet.rawMesh.vertices.count)
-        /*for (vertex, normal) in zip(self.planet.rawMesh.vertices, self.planet.normals) {
-            DebugLights.debugDrawLine(renderEncoder: renderEncoder, uniforms: uniforms, position: vertex, direction: normal, color: float3(1, 0, 0))
-        }*/
-        
+        // for (vertex, normal) in zip(self.planet.rawMesh.vertices, self.planet.normals) {
+        //     DebugLights.debugDrawLine(
+        //         renderEncoder: renderEncoder, uniforms: uniforms, position: vertex,
+        //         direction: normal, color: float3(1, 0, 0))
+        // }
+
         renderEncoder.endEncoding()
         guard let drawable = view.currentDrawable else {
             return
