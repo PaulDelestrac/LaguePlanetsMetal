@@ -73,8 +73,14 @@ struct SettingsView: View {
     private var layerListView: some View {
         if #available(macOS 15.0, *) {
             return ScrollView {
-                ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
-                    layerSection(index)
+                if options.shapeSettings.noiseLayers.isEmpty {
+                    Text("No layers")
+                } else {
+                    ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
+                        if index < options.shapeSettings.noiseLayers.count {
+                            layerSection(index)
+                        }
+                    }
                 }
             }
             .onScrollPhaseChange { old, new in
@@ -87,8 +93,14 @@ struct SettingsView: View {
             }
         } else {
             return List {
-                ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
-                    layerSection(index)
+                if options.shapeSettings.noiseLayers.isEmpty {
+                    Text("No layers")
+                } else {
+                    ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
+                        if index < options.shapeSettings.noiseLayers.count {
+                            layerSection(index)
+                        }
+                    }
                 }
             }
         }
