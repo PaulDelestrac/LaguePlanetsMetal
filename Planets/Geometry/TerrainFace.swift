@@ -41,7 +41,7 @@ class TerrainFace {
     // let flipNormals: Bool
 
     init(
-        shapeGenerator: ShapeGenerator, resolution: Int, localUp: SIMD3<Float>,
+        shapeGenerator: ShapeGenerator, resolution: Int, localUp: SIMD3<Float>
     ) {
         self.shapeGenerator = shapeGenerator
         self.resolution = resolution

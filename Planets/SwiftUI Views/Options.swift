@@ -33,7 +33,7 @@
 import Observation
 import SwiftUI
 
-@Observable class Options: Identifiable, Codable {
+@Observable class Options: Identifiable {
     var id: UUID = UUID()
     var color = float3(0, 0, 0)
     var shapeSettings = ShapeSettings(name: "New Planet")

@@ -7,7 +7,7 @@
 
 import Foundation
 
-@Observable class ShapeSettings: Identifiable, Codable {
+@Observable class ShapeSettings: Identifiable {
     var id: UUID = UUID()
     var name: String = ""
     var resolution: Int = 10
@@ -42,7 +42,7 @@ import Foundation
         self.noiseLayers.append(NoiseLayer())
     }
 
-    class NoiseLayer: Identifiable, Codable {
+    class NoiseLayer: Identifiable {
         var id: UUID = UUID()
         var noiseSettings: NoiseSettings = NoiseSettings()
         var enabled: Bool = true
