@@ -98,8 +98,53 @@ struct MetalViewRepresentable: ViewRepresentable {
     @Binding var isScrolling: Bool
 
     #if os(macOS)
+        func makeCoordinator() -> Coordinator {
+            Coordinator(self)
+        }
+        class Coordinator: NSObject, NSWindowDelegate {
+            var parent: MetalViewRepresentable
+            var dragDebounceTimer: Timer?
+            var mouseMonitor: Any?
+            var isDragging: Bool = false
+
+            init(_ parent: MetalViewRepresentable) {
+                self.parent = parent
+                super.init()
+
+                // Add global mouse event monitor to detect mouse up
+                mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [
+                    .leftMouseUp, .leftMouseDragged,
+                ]) { [weak self] event in
+                    if event.type == .leftMouseUp && self?.isDragging == true {
+                        // Mouse up detected, actually end the drag
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            NotificationCenter.default.post(
+                                name: NSNotification.Name("windowDidDrag"), object: nil)
+                            self?.isDragging = false
+                        }
+                    }
+                }
+            }
+
+            deinit {
+                if let mouseMonitor = mouseMonitor {
+                    NSEvent.removeMonitor(mouseMonitor)
+                }
+            }
+
+            func windowWillMove(_ notification: Notification) {
+                dragDebounceTimer?.invalidate()
+                isDragging = true
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("windowWillDrag"), object: nil)
+            }
+            func windowDidMove(_ notification: Notification) {}
+        }
         func makeNSView(context: Context) -> some NSView {
-            metalView
+            DispatchQueue.main.async {
+                metalView.window?.delegate = context.coordinator
+            }
+            return metalView
         }
         func updateNSView(_ uiView: NSViewType, context: Context) {
             updateMetalView()

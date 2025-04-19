@@ -41,6 +41,7 @@ class GameController: NSObject {
     var lastTime: Double = CFAbsoluteTimeGetCurrent()
     var isEditing: Bool
     var isScrolling: Bool
+    var isWindowDragging: Bool = false
 
     init(metalView: MTKView, options: Options, isEditing: Bool = false, isScrolling: Bool = false) {
         renderer = Renderer(metalView: metalView, options: options)
@@ -48,17 +49,44 @@ class GameController: NSObject {
         self.options = options
         self.isEditing = isEditing
         self.isScrolling = isScrolling
+
         super.init()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowWillDrag),
+            name: NSNotification.Name("windowWillDrag"),
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidDrag),
+            name: NSNotification.Name("windowDidDrag"),
+            object: nil
+        )
+
         metalView.delegate = self
         fps = Double(metalView.preferredFramesPerSecond)
         mtkView(metalView, drawableSizeWillChange: metalView.drawableSize)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc func windowWillDrag() {
+        self.isWindowDragging = true
+    }
+
+    @objc func windowDidDrag() {
+        self.isWindowDragging = false
     }
 }
 
 extension GameController: MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         if !options.shapeSettings.isChanging && !self.isScrolling
-            && !options.shapeSettings.isColorChanging
+            && !options.shapeSettings.isColorChanging && !self.isWindowDragging
         {
             scene.update(size: size)
         }
@@ -69,7 +97,10 @@ extension GameController: MTKViewDelegate {
         let currentTime = CFAbsoluteTimeGetCurrent()
         let deltaTime = (currentTime - lastTime)
         lastTime = currentTime
-        if !options.shapeSettings.isChanging && !options.shapeSettings.isColorChanging {
+
+        if !options.shapeSettings.isChanging && !options.shapeSettings.isColorChanging
+            && !self.isWindowDragging
+        {
             scene.update(deltaTime: Float(deltaTime), isScrolling: self.isScrolling)
         }
         renderer.draw(scene: scene, in: view, options: options)
