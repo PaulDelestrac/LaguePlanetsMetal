@@ -130,9 +130,6 @@ class Planet: Transformable {
         }
 
         // Calculate normals
-        self.normals = calculateVertexNormals(
-            vertices: self.rawMesh.vertices, indices: self.rawMesh.indices)
-        self.rawMesh.normals = self.normals
 
         mergeVerticesAndRecalculateNormals()
     }
