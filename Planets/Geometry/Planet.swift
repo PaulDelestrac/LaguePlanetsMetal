@@ -130,7 +130,6 @@ class Planet: Transformable {
         }
 
         // Calculate normals
-
         mergeVerticesAndRecalculateNormals()
     }
 
@@ -175,12 +174,26 @@ class Planet: Transformable {
 
     func mergeVerticesAndRecalculateNormals() {
         let epsilon: Float = 0.00001
+        let precision: Int = Int(1.0 / epsilon)
 
         var uniqueVertices: [SIMD3<Float>] = []
         var newIndices: [UInt32] = []
+        var vertexKeyMap: [String: Int] = [:]
         var vertexMapping: [Int: Int] = [:]
 
         for (index, vertex) in self.rawMesh.vertices.enumerated() {
+            let vertexKey =
+                "\(Int(vertex.x * Float(precision)))/\(Int(vertex.y * Float(precision)))/\(Int(vertex.z * Float(precision)))"
+
+            if let existingIndex = vertexKeyMap[vertexKey] {
+                vertexMapping[index] = existingIndex
+            } else {
+                let newIndex = uniqueVertices.count
+                vertexKeyMap[vertexKey] = newIndex
+                vertexMapping[index] = newIndex
+                uniqueVertices.append(vertex)
+            }
+            /*
             var found = false
             for (uniqueIndex, uniqueVertex) in uniqueVertices.enumerated() {
                 if distance(vertex, uniqueVertex) < epsilon {
@@ -193,7 +206,7 @@ class Planet: Transformable {
             if !found {
                 vertexMapping[index] = uniqueVertices.count
                 uniqueVertices.append(vertex)
-            }
+            }*/
         }
 
         for oldIndex in self.rawMesh.indices {
