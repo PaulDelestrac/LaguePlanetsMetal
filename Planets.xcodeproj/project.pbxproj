@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		140F64752D04E3FB00C89262 /* TerrainFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F64742D04E3FB00C89262 /* TerrainFace.swift */; };
 		140F64762D04E3FB00C89262 /* Planet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F64732D04E3FB00C89262 /* Planet.swift */; };
-		1457BBD02D4FD154003A1645 /* OptionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1457BBCF2D4FD154003A1645 /* OptionsStore.swift */; };
 		14CAE33E2D061C0200A4CECC /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33D2D061C0200A4CECC /* Options.swift */; };
 		14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */; };
 		14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */; };
@@ -49,7 +48,6 @@
 /* Begin PBXFileReference section */
 		140F64732D04E3FB00C89262 /* Planet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Planet.swift; sourceTree = "<group>"; };
 		140F64742D04E3FB00C89262 /* TerrainFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainFace.swift; sourceTree = "<group>"; };
-		1457BBCF2D4FD154003A1645 /* OptionsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsStore.swift; sourceTree = "<group>"; };
 		14B588BE2D03A29200A350DF /* Planets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Planets.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14CAE33D2D061C0200A4CECC /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSettings.swift; sourceTree = "<group>"; };
@@ -200,7 +198,6 @@
 				14E8CE822D04E2EA00AE0D67 /* DebugLights.swift */,
 				14E8CE832D04E2EA00AE0D67 /* MathLibrary.swift */,
 				14CAE3432D06503700A4CECC /* Noise.swift */,
-				1457BBCF2D4FD154003A1645 /* OptionsStore.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -305,7 +302,6 @@
 				14E8CE922D04E2EA00AE0D67 /* Renderer.swift in Sources */,
 				14E8CE942D04E2EA00AE0D67 /* SceneLighting.swift in Sources */,
 				14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */,
-				1457BBD02D4FD154003A1645 /* OptionsStore.swift in Sources */,
 				14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */,
 				14E8CE992D04E2EA00AE0D67 /* Transform.swift in Sources */,
 				14E8CE9A2D04E2EA00AE0D67 /* VertexDescriptor.swift in Sources */,

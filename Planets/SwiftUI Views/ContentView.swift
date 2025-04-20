@@ -33,7 +33,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var context
     @State private var selectedOptions: Options?
     @State private var selectedOptionsID: UUID?
     @State var optionsList: [Options]

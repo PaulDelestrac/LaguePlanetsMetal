@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @main
 struct PlanetsApp: App {
@@ -15,10 +14,6 @@ struct PlanetsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(optionsList: [])
-                .modelContainer(for: [OptionsStore.self])
-        }
-        .commands {
-            
         }
     }
 }
