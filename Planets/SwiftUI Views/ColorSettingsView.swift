@@ -19,7 +19,7 @@ struct ColorSettingsView: View {
                 in: 0...1,
                 onEditingChanged: { editing in
                     isEditing = editing
-                    options.shapeSettings.isColorChanging = editing
+                    options.isColorChanging = editing
                 }
             )
             .tint(Color.red)
@@ -28,7 +28,7 @@ struct ColorSettingsView: View {
                 in: 0...1,
                 onEditingChanged: { editing in
                     isEditing = editing
-                    options.shapeSettings.isColorChanging = editing
+                    options.isColorChanging = editing
                 }
             )
             .tint(Color.green)
@@ -37,7 +37,7 @@ struct ColorSettingsView: View {
                 in: 0...1,
                 onEditingChanged: { editing in
                     isEditing = editing
-                    options.shapeSettings.isColorChanging = editing
+                    options.isColorChanging = editing
                 }
             )
             .tint(Color.blue)

@@ -53,11 +53,13 @@ struct ContentView: View {
             Spacer()
             HStack {
                 Button {
-                    let shapeSettings = ShapeSettings(name: "New Planet")
-                    optionsList.append(Options(shapeSettings: shapeSettings))
+                    let shapeSettings = ShapeSettings()
+                    optionsList.append(
+                        Options(name: "New Planet", shapeSettings: shapeSettings)
+                    )
                 } label: {
                     Label {
-                        //Text("Add Planet")
+                        Text("Add Planet")
                     } icon: {
                         Image("custom.globe.americas.fill.badge.plus")
                             .resizable()
@@ -94,7 +96,7 @@ struct ContentView: View {
         }
         .toolbarRole(.editor)
         .navigationTitle(
-            Text("\(selectedOptions?.shapeSettings.name ?? "")")
+            Text("\(selectedOptions?.name ?? "")")
         )
         .inspector(isPresented: $isPresented) {
             if selectedOptions != nil {
@@ -146,7 +148,7 @@ private struct OptionsEnvironmentKey: EnvironmentKey {
 }
 
 #Preview {
-    @Previewable @State var settings = [ShapeSettings(name: "")]
+    @Previewable @State var settings = [ShapeSettings()]
     @Previewable @State var options = Options()
     ContentView(optionsList: [])
 }

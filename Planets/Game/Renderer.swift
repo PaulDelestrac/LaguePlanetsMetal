@@ -144,10 +144,10 @@ extension Renderer {
             length: MemoryLayout<Light>.stride * lights.count,
             index: LightBuffer.index)
 
-        if options.shapeSettings.isColorChanging || options.shapeSettings.colorNeedsUpdate {
+        if options.isColorChanging || options.colorNeedsUpdate {
             self.planet.updateColor(options.color)
             oldOptions.color = options.color
-            options.shapeSettings.colorNeedsUpdate = false
+            options.colorNeedsUpdate = false
         }
         if options.shapeSettings.isChanging || options.shapeSettings.needsUpdate {
             self.planet.updateShape(settings: options.shapeSettings)

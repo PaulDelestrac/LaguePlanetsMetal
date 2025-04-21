@@ -105,7 +105,7 @@ class GameController: NSObject {
 extension GameController: MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         if !options.shapeSettings.isChanging && !self.isScrolling
-            && !options.shapeSettings.isColorChanging && !self.isWindowDragging
+            && !options.isColorChanging && !self.isWindowDragging
         {
             scene.update(size: size)
         }
@@ -117,7 +117,7 @@ extension GameController: MTKViewDelegate {
         let deltaTime = (currentTime - lastTime)
         lastTime = currentTime
 
-        if !options.shapeSettings.isChanging && !options.shapeSettings.isColorChanging
+        if !options.shapeSettings.isChanging && !options.isColorChanging
             && !self.isWindowDragging && !self.isWindowResizing
         {
             scene.update(deltaTime: Float(deltaTime), isScrolling: self.isScrolling)

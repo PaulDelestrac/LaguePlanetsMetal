@@ -35,16 +35,25 @@ import SwiftUI
 
 @Observable class Options: Identifiable {
     var id: UUID = UUID()
+    var name: String = "New Planet"
     var color = float3(0, 0, 0)
-    var shapeSettings = ShapeSettings(name: "New Planet")
+    var shapeSettings = ShapeSettings()
+
+    var isColorChanging = false
+    var colorNeedsUpdate: Bool = false
 
     init() {}
+
+    init(name: String) {
+        self.name = name
+    }
 
     init(color: float3) {
         self.color = color
     }
 
-    init(shapeSettings: ShapeSettings) {
+    init(name: String, shapeSettings: ShapeSettings) {
+        self.name = name
         self.shapeSettings = shapeSettings
     }
 

@@ -7,34 +7,17 @@
 
 import Foundation
 
-@Observable class ShapeSettings: Identifiable {
-    var id: UUID = UUID()
-    var name: String = ""
+class ShapeSettings {
     var resolution: Int = 10
     var planetRadius: Float = 1.0
     var noiseLayers: [NoiseLayer] = [NoiseLayer]()
     var isChanging = false
     var needsUpdate: Bool = true
-    var isColorChanging = false
-    var colorNeedsUpdate: Bool = true
     var faceRenderMask: Planet.FaceRenderMask = .All
-
-    init() {
-        self.id = UUID()
-    }
-
-    init(name: String) {
-        self.id = UUID()
-        self.name = name
-    }
-
-    init(id: UUID, name: String) {
-        self.id = id
-        self.name = name
-    }
+    
+    init() {}
 
     init(planetRadius: Float) {
-        self.id = UUID()
         self.planetRadius = planetRadius
     }
 
@@ -42,8 +25,7 @@ import Foundation
         self.noiseLayers.append(NoiseLayer())
     }
 
-    class NoiseLayer: Identifiable {
-        var id: UUID = UUID()
+    class NoiseLayer {
         var noiseSettings: NoiseSettings = NoiseSettings()
         var enabled: Bool = true
         var useFirstLayerAsMask: Bool = true

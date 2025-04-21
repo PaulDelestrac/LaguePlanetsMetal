@@ -14,10 +14,10 @@ struct PlanetsListView: View {
 
     private func nameBinding(for options: Options) -> Binding<String> {
         Binding(
-            get: { options.shapeSettings.name },
+            get: { options.name },
             set: { newValue in
                 if let index = optionsList.firstIndex(where: { $0.id == options.id }) {
-                    optionsList[index].shapeSettings.name = newValue
+                    optionsList[index].name = newValue
                     if selectedOptionsID == options.id {
                         selectedOptions = optionsList[index]
                     }
