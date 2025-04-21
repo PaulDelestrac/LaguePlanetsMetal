@@ -6,17 +6,17 @@
 //
 
 import Foundation
+import SwiftData
 
-class NoiseSettings: Codable {
+@Model
+class NoiseSettings {
     
-    enum FilterType : String, CaseIterable, Identifiable, Codable  {
-        var id: Self { self }
-        
+    enum FilterType: Int, Codable, Hashable {
         case Simple
         case Ridgid
     }
-    var filterType: FilterType = .Simple
-    
+    var filterType: FilterType = FilterType.Simple
+
     var strength: Float = 1.0
     var numLayers: Int = 1
     var baseRoughness: Float = 1.0
@@ -26,4 +26,6 @@ class NoiseSettings: Codable {
     var minValue: Float = 0.0
     
     var weightMultiplier: Float = 0.8
+
+    init() {}
 }

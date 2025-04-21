@@ -31,16 +31,35 @@
 /// THE SOFTWARE.
 
 import Observation
+import SwiftData
 import SwiftUI
 
-@Observable class Options: Identifiable {
+@Model
+class Options: Identifiable {
     var id: UUID = UUID()
     var name: String = "New Planet"
-    var color = float3(0, 0, 0)
+
+    // Replace float3 with individual components
+    var colorX: Float = 0
+    var colorY: Float = 0
+    var colorZ: Float = 0
+
     var shapeSettings = ShapeSettings()
 
     var isColorChanging = false
     var colorNeedsUpdate: Bool = false
+
+    // Computed property to provide the float3 interface
+    var color: float3 {
+        get {
+            return float3(colorX, colorY, colorZ)
+        }
+        set {
+            colorX = newValue.x
+            colorY = newValue.y
+            colorZ = newValue.z
+        }
+    }
 
     init() {}
 
@@ -49,7 +68,9 @@ import SwiftUI
     }
 
     init(color: float3) {
-        self.color = color
+        self.colorX = color.x
+        self.colorY = color.y
+        self.colorZ = color.z
     }
 
     init(name: String, shapeSettings: ShapeSettings) {
@@ -58,7 +79,9 @@ import SwiftUI
     }
 
     init(color: float3, shapeSettings: ShapeSettings) {
-        self.color = color
+        self.colorX = color.x
+        self.colorY = color.y
+        self.colorZ = color.z
         self.shapeSettings = shapeSettings
     }
 

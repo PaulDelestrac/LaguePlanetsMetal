@@ -36,7 +36,7 @@ class Planet: Transformable {
         SIMD3<Float>(0, 0, -1),  // Back
     ]
 
-    enum FaceRenderMask: Int, Codable, Hashable {
+    enum FaceRenderMask: Int, Codable, Hashable, Equatable {
         case All, Top, Bottom, Left, Right, Front, Back
     }
 

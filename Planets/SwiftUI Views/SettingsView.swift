@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+struct SettingsContainerView: View {
+    @Environment(\.options) private var options: Options
+    @Binding var isScrolling: Bool
+
+    var body: some View {
+        SettingsView(
+            isScrolling: $isScrolling
+        )
+        .environment(\.options, options)
+    }
+}
+
 struct SettingsView: View {
     @Environment(\.options) private var options: Options
     @State var isEditing: Bool = false
@@ -16,9 +28,12 @@ struct SettingsView: View {
     @State var refreshMask = false
 
     var body: some View {
-        @Bindable var options = options
+        @Bindable var options: Options = options
         VStack {
-            Picker("Face render mask", selection: $options.shapeSettings.faceRenderMask) {
+            Picker(
+                "Face render mask",
+                selection: $options.shapeSettings.faceRenderMask
+            ) {
                 Text("All").tag(Planet.FaceRenderMask.All)
                 Text("Top").tag(Planet.FaceRenderMask.Top)
                 Text("Bottom").tag(Planet.FaceRenderMask.Bottom)
@@ -26,7 +41,8 @@ struct SettingsView: View {
                 Text("Right").tag(Planet.FaceRenderMask.Right)
                 Text("Front").tag(Planet.FaceRenderMask.Front)
                 Text("Back").tag(Planet.FaceRenderMask.Back)
-            }.onChange(of: options.shapeSettings.faceRenderMask) {
+            }
+            .onChange(of: options.shapeSettings.faceRenderMask) {
                 options.shapeSettings.needsUpdate = true
             }
             ColorSettingsView(isEditing: $isEditing)
@@ -107,7 +123,7 @@ struct SettingsView: View {
     }
 
     private func layerSection(_ index: Int) -> some View {
-        @Bindable var options = options
+        @Bindable var options: Options = options
         return Section("Layer #\(index)") {
             NoiseLayerSettingsView(
                 noiseLayer: $options.shapeSettings.noiseLayers[index],
@@ -128,5 +144,13 @@ struct SettingsView: View {
 
 #Preview {
     @Previewable @State var isScrolling: Bool = false
-    SettingsView(isScrolling: $isScrolling)
+    @Previewable @State var selectedOption = Options()
+
+    VStack {
+        SettingsView(isScrolling: $isScrolling)
+        Divider()
+        SettingsContainerView(
+            isScrolling: $isScrolling
+        )
+    }
 }

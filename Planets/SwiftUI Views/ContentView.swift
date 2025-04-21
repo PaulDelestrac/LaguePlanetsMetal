@@ -30,12 +30,16 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @Query var optionsList: [Options]
+    @Environment(\.modelContext) private var context
+    @Environment(NavigationContext.self) private var navigationContext
+
     @State private var selectedOptions: Options?
     @State private var selectedOptionsID: UUID?
-    @State var optionsList: [Options]
     @State public var isEditing = false
     @State public var isScrolling = false
     @State var isPresented = true
@@ -44,27 +48,24 @@ struct ContentView: View {
     @FocusState var isFocused: Bool
 
     var body: some View {
+        @Bindable var navigationContext = navigationContext
+
         NavigationSplitView {
             PlanetsListView(
                 selectedOptionsID: $selectedOptionsID,
                 selectedOptions: $selectedOptions,
-                optionsList: $optionsList
             )
             Spacer()
             HStack {
                 Button {
                     let shapeSettings = ShapeSettings()
-                    optionsList.append(
-                        Options(name: "New Planet", shapeSettings: shapeSettings)
-                    )
+                    let option = Options(name: "New Planet", shapeSettings: shapeSettings)
+                    context.insert(option)
                 } label: {
                     Label {
                         Text("Add Planet")
                     } icon: {
                         Image("custom.globe.americas.fill.badge.plus")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
                     }
                 }
                 .buttonStyle(.borderless)
@@ -73,48 +74,57 @@ struct ContentView: View {
             .padding(10)
         } detail: {
             VStack {
-                if selectedOptions != nil {
+                if navigationContext.selectedOptions != nil {
                     MetalView(isEditing: $isEditing, isScrolling: $isScrolling)
-                        .border(Color.black, width: 2)
-                        .environment(\.options, selectedOptions!)
+                        .environment(
+                            \.options,
+                             navigationContext.selectedOptions!
+                        )
                 } else {
                     Text("Choose a planet or create a new one!")
                 }
             }
-        }
+        } /*
         .toolbar {
             if selectedOptionsID != nil {
                 Button {
-                    optionsList.removeAll(where: { $0.id == selectedOptionsID })
-                    selectedOptions = nil
-                    selectedOptionsID = nil
+                    let index = optionsList.firstIndex(where: { $0.id == selectedOptionsID })
+                    if let index = index {
+                        deleteOptions(offsets: IndexSet([index]))
+                    }
+                    //selectedOptions = nil
+                    //selectedOptionsID = nil
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
                 .keyboardShortcut(.delete, modifiers: [])
             }
         }
-        .toolbarRole(.editor)
+        .toolbarRole(.editor)*/
         .navigationTitle(
             Text("\(selectedOptions?.name ?? "")")
         )
         .inspector(isPresented: $isPresented) {
-            if selectedOptions != nil {
-                SettingsView(isScrolling: $isScrolling)
-                    .frame(width: 250)
-                    .environment(\.options, selectedOptions!)
-                    .toolbar {
-                        ToolbarItemGroup {
-                            Spacer()
-                            Button {
-                                isPresented.toggle()
-                            } label: {
-                                Image(systemName: "sidebar.right")
-                            }
+            if $navigationContext.selectedOptions.wrappedValue != nil {
+                SettingsView(
+                    isScrolling: $isScrolling
+                )
+                .environment(\.options, navigationContext.selectedOptions!)
+                .frame(
+                    width: 250) /*
+                .toolbar {
+                    ToolbarItemGroup {
+                        Spacer()
+                        Button {
+                            isPresented.toggle()
+                        } label: {
+                            Image(systemName: "sidebar.right")
                         }
                     }
+                }*/
             } else {
-                Text("No planet selected!")
+                Text(
+                    "No planet selected!") /*
                     .toolbar {
                         ToolbarItemGroup {
                             Spacer()
@@ -124,15 +134,17 @@ struct ContentView: View {
                                 Image(systemName: "sidebar.right")
                             }
                         }
-                    }
+                    }*/
             }
         }
     }
 }
 
 extension ContentView {
-    private func deleteOptions(offsets: IndexSet) {
-        optionsList.remove(atOffsets: offsets)
+    func deleteOptions(offsets: IndexSet) {
+        for index in offsets {
+            context.delete(optionsList[index])
+        }
     }
 }
 
@@ -150,5 +162,5 @@ private struct OptionsEnvironmentKey: EnvironmentKey {
 #Preview {
     @Previewable @State var settings = [ShapeSettings()]
     @Previewable @State var options = Options()
-    ContentView(optionsList: [])
+    ContentView()
 }

@@ -43,6 +43,7 @@
 		14E8CEA42D04E2EA00AE0D67 /* DebugLights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE822D04E2EA00AE0D67 /* DebugLights.swift */; };
 		14E8CEA52D04E2EA00AE0D67 /* MathLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE832D04E2EA00AE0D67 /* MathLibrary.swift */; };
 		14E8CEA62D04E2EA00AE0D67 /* PlanetsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE872D04E2EA00AE0D67 /* PlanetsApp.swift */; };
+		14F164D32DB6A1D00096973E /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F164D22DB6A1D00096973E /* NavigationContext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,6 +88,7 @@
 		14E8CE852D04E2EA00AE0D67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14E8CE862D04E2EA00AE0D67 /* Planets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Planets.entitlements; sourceTree = "<group>"; };
 		14E8CE872D04E2EA00AE0D67 /* PlanetsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetsApp.swift; sourceTree = "<group>"; };
+		14F164D22DB6A1D00096973E /* NavigationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -198,6 +200,7 @@
 				14E8CE822D04E2EA00AE0D67 /* DebugLights.swift */,
 				14E8CE832D04E2EA00AE0D67 /* MathLibrary.swift */,
 				14CAE3432D06503700A4CECC /* Noise.swift */,
+				14F164D22DB6A1D00096973E /* NavigationContext.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -293,6 +296,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				14E8CE8E2D04E2EA00AE0D67 /* Camera.swift in Sources */,
+				14F164D32DB6A1D00096973E /* NavigationContext.swift in Sources */,
 				14CAE3442D06503700A4CECC /* Noise.swift in Sources */,
 				14E8CE8F2D04E2EA00AE0D67 /* GameController.swift in Sources */,
 				14E8CE902D04E2EA00AE0D67 /* GameScene.swift in Sources */,
@@ -460,6 +464,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Planets/Planets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
@@ -477,7 +482,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
@@ -485,7 +490,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldelestrac.Planets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
@@ -499,6 +505,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Planets/Planets.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Planets/Preview Content\"";
@@ -515,7 +522,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
@@ -523,7 +530,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldelestrac.Planets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";

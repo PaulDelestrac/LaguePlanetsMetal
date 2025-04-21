@@ -57,6 +57,7 @@ class Renderer: NSObject {
         else {
             fatalError("GPU not available")
         }
+        //self.oldOptions = options
         Self.device = device
         Self.commandQueue = commandQueue
         metalView.device = device

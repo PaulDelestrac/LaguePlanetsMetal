@@ -31,6 +31,7 @@
 /// THE SOFTWARE.
 
 import MetalKit
+import SwiftData
 import SwiftUI
 
 struct MetalView: View {
@@ -51,9 +52,15 @@ struct MetalView: View {
             isScrolling: $isScrolling
         )
         .onAppear {
+            options.colorNeedsUpdate = true
+            options.shapeSettings.needsUpdate = true
             gameController = GameController(
                 metalView: metalView, options: options, isEditing: isEditing,
                 isScrolling: isScrolling)
+        }
+        .onChange(of: options.id) {
+            options.colorNeedsUpdate = true
+            options.shapeSettings.needsUpdate = true
         }
     }
 }
@@ -155,10 +162,7 @@ struct MetalViewRepresentable: ViewRepresentable {
 
 #Preview {
     @Previewable @State var testBool: Bool = false
-    @Previewable @State var options = Options()
+    @Previewable @State var options = Options(name: "New Planet")
     @Previewable @State var isScrolling: Bool = false
-    VStack {
-        MetalView(isEditing: $testBool, isScrolling: $isScrolling)
-        Text("Metal View")
-    }
+    MetalView(isEditing: $testBool, isScrolling: $isScrolling)
 }
