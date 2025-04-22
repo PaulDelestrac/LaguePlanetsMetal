@@ -33,7 +33,7 @@ struct PlanetsListView: View {
         @Bindable var navigationContext = navigationContext
         List(selection: $navigationContext.selectedOptions) {
             ForEach(optionsList) { options in
-                NavigationLink(options.id.uuidString, value: options)
+                NavigationLink(options.name, value: options)
                     .swipeActions {
                         Button(
                             "Delete",

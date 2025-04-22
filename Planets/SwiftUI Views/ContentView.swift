@@ -78,7 +78,7 @@ struct ContentView: View {
                     MetalView(isEditing: $isEditing, isScrolling: $isScrolling)
                         .environment(
                             \.options,
-                             navigationContext.selectedOptions!
+                            navigationContext.selectedOptions!
                         )
                 } else {
                     Text("Choose a planet or create a new one!")
@@ -149,14 +149,7 @@ extension ContentView {
 }
 
 extension EnvironmentValues {
-    var options: Options {
-        get { self[OptionsEnvironmentKey.self] }
-        set { self[OptionsEnvironmentKey.self] = newValue }
-    }
-}
-
-private struct OptionsEnvironmentKey: EnvironmentKey {
-    static let defaultValue: Options = Options()
+    @Entry var options = Options()
 }
 
 #Preview {

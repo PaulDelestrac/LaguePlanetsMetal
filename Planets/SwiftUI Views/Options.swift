@@ -36,7 +36,7 @@ import SwiftUI
 
 @Model
 class Options: Identifiable {
-    var id: UUID = UUID()
+    @Attribute(.unique) var id: UUID
     var name: String = "New Planet"
 
     // Replace float3 with individual components
@@ -61,24 +61,30 @@ class Options: Identifiable {
         }
     }
 
-    init() {}
+    init() {
+        self.id = UUID()
+    }
 
     init(name: String) {
+        self.id = UUID()
         self.name = name
     }
 
     init(color: float3) {
+        self.id = UUID()
         self.colorX = color.x
         self.colorY = color.y
         self.colorZ = color.z
     }
 
     init(name: String, shapeSettings: ShapeSettings) {
+        self.id = UUID()
         self.name = name
         self.shapeSettings = shapeSettings
     }
 
     init(color: float3, shapeSettings: ShapeSettings) {
+        self.id = UUID()
         self.colorX = color.x
         self.colorY = color.y
         self.colorZ = color.z

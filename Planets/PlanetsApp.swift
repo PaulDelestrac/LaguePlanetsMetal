@@ -9,9 +9,7 @@ import SwiftUI
 
 @main
 struct PlanetsApp: App {
-    //@State var optionsList: [Options] = []
     @State private var navigationContext = NavigationContext()
-
     var body: some Scene {
         WindowGroup {
             ContentView()

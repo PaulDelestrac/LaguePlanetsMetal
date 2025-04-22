@@ -48,7 +48,7 @@ class Renderer: NSObject {
     var planet: Planet
 
     var needsUpdate: Bool = true
-    var oldOptions: Options = Options()
+    var oldOptions: Options
 
     init(metalView: MTKView, options: Options) {
         guard
@@ -57,12 +57,15 @@ class Renderer: NSObject {
         else {
             fatalError("GPU not available")
         }
-        //self.oldOptions = options
+        self.oldOptions = options
         Self.device = device
         Self.commandQueue = commandQueue
         metalView.device = device
 
-        self.planet = Planet(device: device, shapeSettings: options.shapeSettings)
+        self.planet = Planet(
+            device: device,
+            shapeSettings: options.shapeSettings
+        )
 
         // create the shader function library
         let library = device.makeDefaultLibrary()
@@ -147,12 +150,12 @@ extension Renderer {
 
         if options.isColorChanging || options.colorNeedsUpdate {
             self.planet.updateColor(options.color)
-            oldOptions.color = options.color
+            oldOptions = options
             options.colorNeedsUpdate = false
         }
         if options.shapeSettings.isChanging || options.shapeSettings.needsUpdate {
             self.planet.updateShape(settings: options.shapeSettings)
-            oldOptions.shapeSettings = options.shapeSettings
+            oldOptions = options
             options.shapeSettings.needsUpdate = false
         }
 

@@ -33,10 +33,12 @@ class ShapeSettings {
         var useFirstLayerAsMask: Bool = true
 
         // Store NoiseSettings separately - this avoids SIMD persistence issues
-        @Relationship(deleteRule: .cascade) var noiseSettingsData = NoiseSettingsData()
+        //@Relationship(deleteRule: .cascade)
+        var noiseSettingsData = NoiseSettingsData()
 
         // Transient computed property that converts between persistable data and SIMD types
-        @Transient var noiseSettings: NoiseSettings {
+        //@Transient
+        var noiseSettings: NoiseSettings {
             get {
                 let settings = NoiseSettings()
                 settings.filterType = self.noiseSettingsData.filterType
