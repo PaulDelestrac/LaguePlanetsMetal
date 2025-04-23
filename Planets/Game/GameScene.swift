@@ -47,7 +47,12 @@ struct GameScene {
         camera.distance = 5
         camera.transform = defaultView
     }
-    
+
+    init(distance: Float) {
+        camera.distance = distance
+        camera.transform = defaultView
+    }
+
     mutating func update(size: CGSize) {
         camera.update(size: size)
     }

@@ -15,59 +15,33 @@ struct PlanetsListView: View {
     @Binding var selectedOptions: Options?
     @FocusState var isFocused: Bool
 
-    private func nameBinding(for options: Options) -> Binding<String> {
-        Binding(
-            get: { options.name },
-            set: { newValue in
-                if let index = optionsList.firstIndex(where: { $0.id == options.id }) {
-                    optionsList[index].name = newValue
-                    if selectedOptionsID == options.id {
-                        selectedOptions = optionsList[index]
-                    }
-                }
-            }
-        )
-    }
-
     var body: some View {
         @Bindable var navigationContext = navigationContext
         List(selection: $navigationContext.selectedOptions) {
             ForEach(optionsList) { options in
-                NavigationLink(options.name, value: options)
+                NavigationLink(options.name, value: options) //{
                     .swipeActions {
                         Button(
                             "Delete",
                             systemImage: "trash",
                             role: .destructive
                         ) {
-                            navigationContext.selectedOptions = nil
-                            context.delete(options)                        }
-                    }
-                /*NavigationLink(value: options.id) {
-                    TextField(
-                        "Planet Name",
-                        text: nameBinding(for: options)
-                    )
-                    .focused($isFocused)
-                    .textContentType(.name)
-                    .contextMenu {
-                        Button("Delete", systemImage: "trash") {
-                            if let index = optionsList.firstIndex(where: { $0.id == options.id}) {
-                                deleteItems(at: IndexSet([index]))
+                            if options.id == navigationContext.selectedOptions?.id {
+                                navigationContext.selectedOptions = nil
                             }
-                            if selectedOptionsID == options.id {
-                                selectedOptions = nil
-                                selectedOptionsID = nil
-                            }
+                            context.delete(options)
                         }
-                        RenameButton()
                     }
-                    .renameAction {
-                        isFocused = true
-                    }
-                }*/
+
             }
-            .onDelete(perform: deleteItems)
+            .onDelete {
+                $0.forEach { index in
+                    if navigationContext.selectedOptions?.id == optionsList[index].id {
+                        navigationContext.selectedOptions = nil
+                    }
+                }
+                deleteItems(at: $0)
+            }
             .renameAction {
                 isFocused = true
             }

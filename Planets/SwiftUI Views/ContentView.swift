@@ -84,7 +84,8 @@ struct ContentView: View {
                     Text("Choose a planet or create a new one!")
                 }
             }
-        } /*
+        }
+        /*
         .toolbar {
             if selectedOptionsID != nil {
                 Button {
@@ -105,39 +106,53 @@ struct ContentView: View {
             Text("\(selectedOptions?.name ?? "")")
         )
         .inspector(isPresented: $isPresented) {
+            Inspector(
+                navigationContext: navigationContext,
+                isScrolling: $isScrolling
+            )
+            .toolbar {
+                RightToolbarItems(isPresented: $isPresented)
+            }
+        }
+    }
+
+    struct Inspector: View {
+        @Bindable var navigationContext: NavigationContext
+        @Binding var isScrolling: Bool
+        var body: some View {
             if $navigationContext.selectedOptions.wrappedValue != nil {
                 SettingsView(
                     isScrolling: $isScrolling
                 )
                 .environment(\.options, navigationContext.selectedOptions!)
                 .frame(
-                    width: 250) /*
-                .toolbar {
-                    ToolbarItemGroup {
-                        Spacer()
-                        Button {
-                            isPresented.toggle()
-                        } label: {
-                            Image(systemName: "sidebar.right")
-                        }
-                    }
-                }*/
+                    width: 250)
             } else {
-                Text(
-                    "No planet selected!") /*
-                    .toolbar {
-                        ToolbarItemGroup {
-                            Spacer()
-                            Button {
-                                isPresented.toggle()
-                            } label: {
-                                Image(systemName: "sidebar.right")
-                            }
-                        }
-                    }*/
+                VStack {
+                    Image("custom.globe.europe.africa.badge.questionmark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 32, height: 32)
+                    Text("No planet selected!")
+                }
             }
         }
     }
+
+    struct RightToolbarItems: ToolbarContent {
+        @Binding var isPresented: Bool
+        var body: some ToolbarContent {
+            ToolbarItem(content: { Spacer() })
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isPresented.toggle()
+                } label: {
+                    Image(systemName: "sidebar.right")
+                }
+            }
+        }
+    }
+
 }
 
 extension ContentView {

@@ -5,6 +5,7 @@
 //  Created by Paul Delestrac on 10/12/2024.
 //
 
+import MetalKit
 import SwiftUI
 
 struct SettingsContainerView: View {
@@ -20,16 +21,72 @@ struct SettingsContainerView: View {
 }
 
 struct SettingsView: View {
-    @Environment(\.options) private var options: Options
+    @Environment(\.options) private var environmentOptions: Options
+    @State private var localImage: NSImage? = nil
+    @State private var localImageHasChanged: Bool = false
     @State var isEditing: Bool = false
     @Binding var isScrolling: Bool
+    @FocusState var isFocused: Bool
     @State var refreshList = false
     @State var refreshEye = false
     @State var refreshMask = false
+    @State var gameSceneFovRadians: Float?
+
+    @State var fakeIsEditing: Bool = false
+    @State var fakeIsScrolling: Bool = false
+    @State var isExpanded: Bool = false
 
     var body: some View {
-        @Bindable var options: Options = options
+        @Bindable var options: Options = environmentOptions
         VStack {
+            HStack {
+                TextField("Planet Name", text: $options.name)
+                    .focused($isFocused)
+                    .font(.title)
+                    .padding()
+                RenameButton()
+                    .renameAction {
+                        isFocused.toggle()
+                    }
+            }
+            Button("Export") {
+                var gameScene = GameScene()
+                gameSceneFovRadians = gameScene.camera.fov
+                gameScene.camera.distance = options
+                    .getIdealDistance(
+                        fovRadians: gameSceneFovRadians ?? Float(
+                            70
+                        ).degreesToRadians,
+                        fovRatio: 0.6
+                    )
+                gameScene.update(deltaTime: 0.0)
+                let renderer = Renderer(metalView: MTKView(), options: options)
+                if let cgImage = renderer.captureFrame(scene: gameScene, options: options) {
+                    let nsImage = NSImage(
+                        cgImage: cgImage,
+                        size: CGSize(
+                            width: cgImage.width,
+                            height: cgImage.height
+                        )
+                    )
+                    localImage = nsImage
+                    localImageHasChanged = true
+                    options.image = nsImage
+                    isExpanded = true
+                }
+            }
+            .sheet(isPresented: $isExpanded) {
+                VStack {
+                    if let imageToShare = localImage {
+                        Image(nsImage: imageToShare)
+                        ShareLink(
+                            item: Image(nsImage: imageToShare),
+                            preview: SharePreview("Share", image: Image(nsImage: imageToShare)))
+                        .padding(.vertical)
+                    }
+                }
+            }
+            .padding(48)
             Picker(
                 "Face render mask",
                 selection: $options.shapeSettings.faceRenderMask
@@ -84,16 +141,24 @@ struct SettingsView: View {
                 .id(refreshList)
 
         }
+        .onChange(of: localImageHasChanged) { _, _ in
+            localImageHasChanged = false
+            localImage = options.image
+        }
+        //.onAppear {
+        //    localImage = options.image
+        //}
     }
 
     private var layerListView: some View {
         if #available(macOS 15.0, *) {
             return ScrollView {
-                if options.shapeSettings.noiseLayers.isEmpty {
+                if environmentOptions.shapeSettings.noiseLayers.isEmpty {
                     Text("No layers")
                 } else {
-                    ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
-                        if index < options.shapeSettings.noiseLayers.count {
+                    ForEach(environmentOptions.shapeSettings.noiseLayers.indices, id: \.self) {
+                        index in
+                        if index < environmentOptions.shapeSettings.noiseLayers.count {
                             layerSection(index)
                         }
                     }
@@ -109,11 +174,12 @@ struct SettingsView: View {
             }
         } else {
             return List {
-                if options.shapeSettings.noiseLayers.isEmpty {
+                if environmentOptions.shapeSettings.noiseLayers.isEmpty {
                     Text("No layers")
                 } else {
-                    ForEach(options.shapeSettings.noiseLayers.indices, id: \.self) { index in
-                        if index < options.shapeSettings.noiseLayers.count {
+                    ForEach(environmentOptions.shapeSettings.noiseLayers.indices, id: \.self) {
+                        index in
+                        if index < environmentOptions.shapeSettings.noiseLayers.count {
                             layerSection(index)
                         }
                     }
@@ -123,7 +189,7 @@ struct SettingsView: View {
     }
 
     private func layerSection(_ index: Int) -> some View {
-        @Bindable var options: Options = options
+        @Bindable var options: Options = environmentOptions
         return Section("Layer #\(index)") {
             NoiseLayerSettingsView(
                 noiseLayer: $options.shapeSettings.noiseLayers[index],

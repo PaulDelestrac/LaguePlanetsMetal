@@ -85,8 +85,7 @@ class Renderer: NSObject {
             MTLVertexDescriptor.defaultLayout
         do {
             pipelineState =
-                try device.makeRenderPipelineState(
-                    descriptor: pipelineDescriptor)
+                try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
         } catch {
             fatalError(error.localizedDescription)
         }
@@ -183,6 +182,113 @@ extension Renderer {
         }
         commandBuffer.present(drawable)
         commandBuffer.commit()
+    }
+
+    func captureFrame(scene: GameScene, options: Options) -> CGImage? {
+        // Create a texture descriptor matching the view size
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: Int(256),
+            height: Int(256),
+            mipmapped: false
+        )
+        textureDescriptor.usage = [.renderTarget, .shaderRead]
+
+        let depthDescriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .depth32Float,
+            width: Int(256),
+            height: Int(256),
+            mipmapped: false
+        )
+        depthDescriptor.usage = [.renderTarget]
+
+        // Create render target texture and depth buffer
+        guard let renderTargetTexture = Self.device.makeTexture(descriptor: textureDescriptor),
+            let depthTexture = Self.device.makeTexture(
+                descriptor: depthDescriptor)
+        else {
+            return nil
+        }
+
+        // Create render pass descriptor
+        let renderPassDescriptor = MTLRenderPassDescriptor()
+        renderPassDescriptor.colorAttachments[0].texture = renderTargetTexture
+        renderPassDescriptor.colorAttachments[0].loadAction = .clear
+        renderPassDescriptor.colorAttachments[0].storeAction = .store
+        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
+            red: 0.93, green: 0.97, blue: 1.0, alpha: 1.0)
+        renderPassDescriptor.depthAttachment.texture = depthTexture
+        renderPassDescriptor.depthAttachment.loadAction = .clear
+        renderPassDescriptor.depthAttachment.storeAction = .store
+        renderPassDescriptor.depthAttachment.clearDepth = 1.0
+
+        // Create command buffer
+        guard let commandBuffer = Self.commandQueue.makeCommandBuffer(),
+            let renderEncoder =
+                commandBuffer.makeRenderCommandEncoder(
+                    descriptor: renderPassDescriptor)
+        else {
+            return nil
+        }
+
+        // Render the scene
+        updateUniforms(scene: scene)
+        renderEncoder.setDepthStencilState(depthStencilState)
+        renderEncoder.setRenderPipelineState(pipelineState)
+
+        var lights = scene.lighting.lights
+        renderEncoder.setFragmentBytes(
+            &lights,
+            length: MemoryLayout<Light>.stride * lights.count,
+            index: LightBuffer.index)
+
+        planet.updateColor(options.color)
+        planet.render(encoder: renderEncoder, uniforms: uniforms, params: params)
+        renderEncoder.endEncoding()
+
+        // Complete rendering
+        commandBuffer.commit()
+        commandBuffer.waitUntilCompleted()
+
+        // Create CGImage from texture
+        return self.createCGImage(from: renderTargetTexture)
+    }
+
+    private func createCGImage(from texture: MTLTexture) -> CGImage? {
+        let width = texture.width
+        let height = texture.height
+        let bytesPerRow = width * 4
+
+        // Create a buffer to hold texture data
+        var data = [UInt8](repeating: 0, count: width * height * 4)
+
+        // Copy texture data to buffer
+        texture.getBytes(
+            &data,
+            bytesPerRow: bytesPerRow,
+            from: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0)
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(
+            rawValue:
+                CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
+
+        guard
+            let context = CGContext(
+                data: &data,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: bitmapInfo.rawValue
+            )
+        else {
+            return nil
+        }
+
+        return context.makeImage()
     }
 }
 

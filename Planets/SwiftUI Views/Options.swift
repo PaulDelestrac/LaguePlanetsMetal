@@ -39,6 +39,23 @@ class Options: Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String = "New Planet"
 
+    var imageData: Data?
+
+    // Computed property to provide NSImage interface
+    var image: NSImage? {
+        get {
+            guard let data = imageData else { return nil }
+            return NSImage(data: data)
+        }
+        set {
+            if let newValue = newValue, let tiffData = newValue.tiffRepresentation {
+                imageData = tiffData
+            } else {
+                imageData = nil
+            }
+        }
+    }
+
     // Replace float3 with individual components
     var colorX: Float = 0
     var colorY: Float = 0
@@ -93,5 +110,14 @@ class Options: Identifiable {
 
     func setShapeSettings(_ shapeSettings: ShapeSettings) {
         self.shapeSettings = shapeSettings
+    }
+
+    func getIdealDistance(fovRadians: Float, fovRatio: Float) -> Float {
+        let thetaRadians: Float = fovRadians * fovRatio
+        var totalMaxRadius: Float = shapeSettings.planetRadius
+        for noise in shapeSettings.noiseLayers {
+            totalMaxRadius += noise.noiseSettings.strength
+        }
+        return totalMaxRadius / tan(thetaRadians / 2)
     }
 }
