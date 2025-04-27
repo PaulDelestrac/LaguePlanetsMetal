@@ -129,11 +129,14 @@ struct ContentView: View {
                     width: 250)
             } else {
                 VStack {
-                    Image("custom.globe.europe.africa.badge.questionmark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                    Text("No planet selected!")
+                    // Image("custom.globe.europe.africa.badge.questionmark")
+                    //     .resizable()
+                    //     .scaledToFit()
+                    //     .frame(width: 32, height: 32)
+                    // Text("No planet selected!")
+                    Text(
+                        "TODO - change the planet selection to be a grid of miniatures like in freeform app"
+                    )
                 }
             }
         }

@@ -41,6 +41,7 @@ class Renderer: NSObject {
 
     var pipelineState: MTLRenderPipelineState!
     let depthStencilState: MTLDepthStencilState?
+    let metalClearColor = MTLClearColor(red: 0.93, green: 0.97, blue: 1.0, alpha: 1.0)
 
     var uniforms = Uniforms()
     var params = Params()
@@ -91,11 +92,7 @@ class Renderer: NSObject {
         }
         depthStencilState = Renderer.buildDepthStencilState()
         super.init()
-        metalView.clearColor = MTLClearColor(
-            red: 0.93,
-            green: 0.97,
-            blue: 1.0,
-            alpha: 1.0)
+        metalView.clearColor = self.metalClearColor
         metalView.depthStencilPixelFormat = .depth32Float
         mtkView(
             metalView,
@@ -184,20 +181,23 @@ extension Renderer {
         commandBuffer.commit()
     }
 
-    func captureFrame(scene: GameScene, options: Options) -> CGImage? {
+    func captureFrame(scene: GameScene, in view: MTKView, options: Options) -> CGImage? {
+        let textureWidth: Int = 256
+        let textureHeight: Int = 256
+
         // Create a texture descriptor matching the view size
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .bgra8Unorm,
-            width: Int(256),
-            height: Int(256),
+            pixelFormat: view.colorPixelFormat,
+            width: textureWidth,
+            height: textureHeight,
             mipmapped: false
         )
         textureDescriptor.usage = [.renderTarget, .shaderRead]
 
         let depthDescriptor = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .depth32Float,
-            width: Int(256),
-            height: Int(256),
+            width: textureWidth,
+            height: textureHeight,
             mipmapped: false
         )
         depthDescriptor.usage = [.renderTarget]
@@ -215,8 +215,7 @@ extension Renderer {
         renderPassDescriptor.colorAttachments[0].texture = renderTargetTexture
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].storeAction = .store
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
-            red: 0.93, green: 0.97, blue: 1.0, alpha: 1.0)
+        renderPassDescriptor.colorAttachments[0].clearColor = self.metalClearColor
         renderPassDescriptor.depthAttachment.texture = depthTexture
         renderPassDescriptor.depthAttachment.loadAction = .clear
         renderPassDescriptor.depthAttachment.storeAction = .store

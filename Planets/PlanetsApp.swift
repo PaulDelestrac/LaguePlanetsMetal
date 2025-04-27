@@ -12,8 +12,9 @@ struct PlanetsApp: App {
     @State private var navigationContext = NavigationContext()
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(navigationContext)
+            PlanetsGridView()
+            //ContentView()
+            //    .environment(navigationContext)
         }
         .modelContainer(for: [Options.self])
     }

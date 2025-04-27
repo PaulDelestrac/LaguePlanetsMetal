@@ -42,6 +42,7 @@ class Options: Identifiable {
     var imageData: Data?
 
     // Computed property to provide NSImage interface
+    #if os(macOS)
     var image: NSImage? {
         get {
             guard let data = imageData else { return nil }
@@ -55,6 +56,9 @@ class Options: Identifiable {
             }
         }
     }
+    #else
+    var image: NSImage? { nil }
+    #endif
 
     // Replace float3 with individual components
     var colorX: Float = 0

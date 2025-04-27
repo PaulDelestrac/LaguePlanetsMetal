@@ -52,16 +52,19 @@ struct SettingsView: View {
             Button("Export") {
                 var gameScene = GameScene()
                 gameSceneFovRadians = gameScene.camera.fov
-                gameScene.camera.distance = options
+                gameScene.camera.distance =
+                    options
                     .getIdealDistance(
-                        fovRadians: gameSceneFovRadians ?? Float(
-                            70
-                        ).degreesToRadians,
+                        fovRadians: gameSceneFovRadians
+                            ?? Float(
+                                70
+                            ).degreesToRadians,
                         fovRatio: 0.6
                     )
                 gameScene.update(deltaTime: 0.0)
-                let renderer = Renderer(metalView: MTKView(), options: options)
-                if let cgImage = renderer.captureFrame(scene: gameScene, options: options) {
+                let metalView = MTKView()
+                let renderer = Renderer(metalView: metalView, options: options)
+                if let cgImage = renderer.captureFrame(scene: gameScene, in: metalView, options: options) {
                     let nsImage = NSImage(
                         cgImage: cgImage,
                         size: CGSize(
@@ -81,7 +84,8 @@ struct SettingsView: View {
                         Image(nsImage: imageToShare)
                         ShareLink(
                             item: Image(nsImage: imageToShare),
-                            preview: SharePreview("Share", image: Image(nsImage: imageToShare)))
+                            preview: SharePreview("Share", image: Image(nsImage: imageToShare))
+                        )
                         .padding(.vertical)
                     }
                 }
