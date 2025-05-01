@@ -149,9 +149,6 @@ struct SettingsView: View {
             localImageHasChanged = false
             localImage = options.image
         }
-        //.onAppear {
-        //    localImage = options.image
-        //}
     }
 
     private var layerListView: some View {
@@ -219,8 +216,6 @@ struct SettingsView: View {
     VStack {
         SettingsView(isScrolling: $isScrolling)
         Divider()
-        SettingsContainerView(
-            isScrolling: $isScrolling
-        )
+        SettingsContainerView(isScrolling: $isScrolling)
     }
 }

@@ -10,6 +10,7 @@
 		140F64752D04E3FB00C89262 /* TerrainFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F64742D04E3FB00C89262 /* TerrainFace.swift */; };
 		140F64762D04E3FB00C89262 /* Planet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140F64732D04E3FB00C89262 /* Planet.swift */; };
 		1410B2382DBACD7700DCFD4B /* PlanetsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1410B2372DBACD7700DCFD4B /* PlanetsGridView.swift */; };
+		145BC5892DBEA34000D44877 /* Glur in Frameworks */ = {isa = PBXBuildFile; productRef = 145BC5882DBEA34000D44877 /* Glur */; };
 		14CAE33E2D061C0200A4CECC /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33D2D061C0200A4CECC /* Options.swift */; };
 		14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE33F2D06393F00A4CECC /* ShapeSettings.swift */; };
 		14CAE3422D0644FD00A4CECC /* ShapeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14CAE3412D0644FD00A4CECC /* ShapeGenerator.swift */; };
@@ -44,6 +45,7 @@
 		14E8CEA42D04E2EA00AE0D67 /* DebugLights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE822D04E2EA00AE0D67 /* DebugLights.swift */; };
 		14E8CEA52D04E2EA00AE0D67 /* MathLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE832D04E2EA00AE0D67 /* MathLibrary.swift */; };
 		14E8CEA62D04E2EA00AE0D67 /* PlanetsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E8CE872D04E2EA00AE0D67 /* PlanetsApp.swift */; };
+		14EE96532DC37A2500E1C6AE /* PlanetContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EE96522DC37A2500E1C6AE /* PlanetContentView.swift */; };
 		14F164D32DB6A1D00096973E /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F164D22DB6A1D00096973E /* NavigationContext.swift */; };
 /* End PBXBuildFile section */
 
@@ -90,6 +92,7 @@
 		14E8CE852D04E2EA00AE0D67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14E8CE862D04E2EA00AE0D67 /* Planets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Planets.entitlements; sourceTree = "<group>"; };
 		14E8CE872D04E2EA00AE0D67 /* PlanetsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetsApp.swift; sourceTree = "<group>"; };
+		14EE96522DC37A2500E1C6AE /* PlanetContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetContentView.swift; sourceTree = "<group>"; };
 		14F164D22DB6A1D00096973E /* NavigationContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -98,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				145BC5892DBEA34000D44877 /* Glur in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -192,6 +196,7 @@
 				14E508C12D08EBA6004B4375 /* NoiseLayerSettingsView.swift */,
 				14E508C32D08F17B004B4375 /* ColorSettingsView.swift */,
 				1410B2372DBACD7700DCFD4B /* PlanetsGridView.swift */,
+				14EE96522DC37A2500E1C6AE /* PlanetContentView.swift */,
 			);
 			path = "SwiftUI Views";
 			sourceTree = "<group>";
@@ -242,6 +247,7 @@
 			);
 			name = Planets;
 			packageProductDependencies = (
+				145BC5882DBEA34000D44877 /* Glur */,
 			);
 			productName = Planets;
 			productReference = 14B588BE2D03A29200A350DF /* Planets.app */;
@@ -271,6 +277,9 @@
 			);
 			mainGroup = 14B588B52D03A29100A350DF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				145BC5872DBEA34000D44877 /* XCLocalSwiftPackageReference "../../Downloads/Glur-1.0.4" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 14B588BF2D03A29200A350DF /* Products */;
 			projectDirPath = "";
@@ -306,6 +315,7 @@
 				14E508BC2D08E17E004B4375 /* RidgidNoiseFilter.swift in Sources */,
 				14E127362D0786F700E12420 /* NoiseSettings.swift in Sources */,
 				14E8CE912D04E2EA00AE0D67 /* PlayerCamera.swift in Sources */,
+				14EE96532DC37A2500E1C6AE /* PlanetContentView.swift in Sources */,
 				14E8CE922D04E2EA00AE0D67 /* Renderer.swift in Sources */,
 				14E8CE942D04E2EA00AE0D67 /* SceneLighting.swift in Sources */,
 				14CAE3402D06393F00A4CECC /* ShapeSettings.swift in Sources */,
@@ -565,6 +575,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		145BC5872DBEA34000D44877 /* XCLocalSwiftPackageReference "../../Downloads/Glur-1.0.4" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../Downloads/Glur-1.0.4";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		145BC5882DBEA34000D44877 /* Glur */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Glur;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 14B588B62D03A29200A350DF /* Project object */;
 }

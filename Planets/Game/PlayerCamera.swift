@@ -33,7 +33,6 @@
 import Foundation
 
 struct PlayerCamera: Camera {
-    
     var transform = Transform()
     var aspect: Float = 1.0
     var fov = Float(70).degreesToRadians

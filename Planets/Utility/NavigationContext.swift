@@ -18,7 +18,7 @@ class NavigationContext {
 
     init(
         selectedOptions: Options? = nil,
-        columnVisibility: NavigationSplitViewVisibility = .automatic,
+        columnVisibility: NavigationSplitViewVisibility = .doubleColumn,
     ) {
         self.selectedOptions = selectedOptions
         self.columnVisibility = columnVisibility

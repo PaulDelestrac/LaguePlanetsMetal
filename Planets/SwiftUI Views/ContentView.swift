@@ -46,6 +46,7 @@ struct ContentView: View {
 
     @State var temporaryText = ""
     @FocusState var isFocused: Bool
+    @Binding var refreshMiniatures: Bool
 
     var body: some View {
         @Bindable var navigationContext = navigationContext
@@ -108,7 +109,7 @@ struct ContentView: View {
         .inspector(isPresented: $isPresented) {
             Inspector(
                 navigationContext: navigationContext,
-                isScrolling: $isScrolling
+                isScrolling: $isScrolling,
             )
             .toolbar {
                 RightToolbarItems(isPresented: $isPresented)
@@ -173,5 +174,6 @@ extension EnvironmentValues {
 #Preview {
     @Previewable @State var settings = [ShapeSettings()]
     @Previewable @State var options = Options()
-    ContentView()
+    @Previewable @State var refresh: Bool = false
+    ContentView(refreshMiniatures: $refresh)
 }

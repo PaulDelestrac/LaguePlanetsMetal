@@ -35,6 +35,7 @@ import SwiftData
 import SwiftUI
 
 struct MetalView: View {
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.options) private var options: Options
     @Binding public var isEditing: Bool
     @Binding public var isScrolling: Bool
@@ -42,14 +43,16 @@ struct MetalView: View {
     @State private var gameController: GameController?
     @State private var previousTranslation = CGSize.zero
     @State private var previousScroll: CGFloat = 1
+    @State private var isDarkMode: Bool = false
 
     var body: some View {
         MetalViewRepresentable(
             gameController: gameController,
-            metalView: $metalView,
             options: options,
+            metalView: $metalView,
             isEditing: $isEditing,
-            isScrolling: $isScrolling
+            isScrolling: $isScrolling,
+            isDarkMode: $isDarkMode
         )
         .onAppear {
             options.colorNeedsUpdate = true
@@ -62,96 +65,107 @@ struct MetalView: View {
             options.colorNeedsUpdate = true
             options.shapeSettings.needsUpdate = true
         }
+        .onChange(of: colorScheme) {
+            isDarkMode = colorScheme == .dark
+        }
     }
 }
 
 #if os(macOS)
-    typealias ViewRepresentable = NSViewRepresentable
+typealias ViewRepresentable = NSViewRepresentable
 #elseif os(iOS)
-    typealias ViewRepresentable = UIViewRepresentable
+typealias ViewRepresentable = UIViewRepresentable
 #endif
 
 struct MetalViewRepresentable: ViewRepresentable {
     let gameController: GameController?
-    @Binding var metalView: MTKView
     let options: Options
+    @Binding var metalView: MTKView
     @Binding var isEditing: Bool
     @Binding var isScrolling: Bool
+    @Binding var isDarkMode: Bool
 
-    #if os(macOS)
-        func makeCoordinator() -> Coordinator {
-            Coordinator(self)
-        }
-        class Coordinator: NSObject, NSWindowDelegate {
-            var parent: MetalViewRepresentable
-            var dragDebounceTimer: Timer?
-            var mouseMonitor: Any?
-            var isDragging: Bool = false
-            var isResizing: Bool = false
+#if os(macOS)
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
 
-            init(_ parent: MetalViewRepresentable) {
-                self.parent = parent
-                super.init()
+    class Coordinator: NSObject, NSWindowDelegate {
+        var parent: MetalViewRepresentable
+        var dragDebounceTimer: Timer?
+        var mouseMonitor: Any?
+        var isDragging: Bool = false
+        var isResizing: Bool = false
 
-                // Add global mouse event monitor to detect mouse up
-                mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [
-                    .leftMouseUp, .leftMouseDragged,
-                ]) { [weak self] event in
-                    if event.type == .leftMouseUp && self?.isDragging == true {
-                        // Mouse up detected, actually end the drag
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            NotificationCenter.default.post(
-                                name: NSNotification.Name("windowDidDrag"), object: nil)
-                            self?.isDragging = false
-                        }
+        init(_ parent: MetalViewRepresentable) {
+            self.parent = parent
+            super.init()
+
+            // Add global mouse event monitor to detect mouse up
+            mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [
+                .leftMouseUp, .leftMouseDragged,
+            ]) { [weak self] event in
+                if event.type == .leftMouseUp && self?.isDragging == true {
+                    // Mouse up detected, actually end the drag
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        NotificationCenter.default.post(
+                            name: NSNotification.Name("windowDidDrag"), object: nil)
+                        self?.isDragging = false
                     }
                 }
             }
-
-            deinit {
-                if let mouseMonitor = mouseMonitor {
-                    NSEvent.removeMonitor(mouseMonitor)
-                }
-            }
-
-            func windowWillMove(_ notification: Notification) {
-                dragDebounceTimer?.invalidate()
-                isDragging = true
-                NotificationCenter.default.post(
-                    name: NSNotification.Name("windowWillDrag"), object: nil)
-            }
-            func windowDidMove(_ notification: Notification) {}
-            func windowWillStartLiveResize(_ notification: Notification) {
-                dragDebounceTimer?.invalidate()
-                isResizing = true
-                NotificationCenter.default.post(
-                    name: NSNotification.Name("windowWillResize"), object: nil)
-            }
-            func windowDidEndLiveResize(_ notification: Notification) {
-                dragDebounceTimer?.invalidate()
-                isResizing = false
-                NotificationCenter.default.post(
-                    name: NSNotification.Name("windowDidResize"), object: nil)
-            }
-        }
-        func makeNSView(context: Context) -> some NSView {
-            DispatchQueue.main.async {
-                metalView.window?.delegate = context.coordinator
-            }
-            return metalView
-        }
-        func updateNSView(_ uiView: NSViewType, context: Context) {
-            updateMetalView()
-        }
-    #elseif os(iOS)
-        func makeUIView(context: Context) -> MTKView {
-            metalView
         }
 
-        func updateUIView(_ uiView: MTKView, context: Context) {
-            updateMetalView()
+        deinit {
+            if let mouseMonitor = mouseMonitor {
+                NSEvent.removeMonitor(mouseMonitor)
+            }
         }
-    #endif
+
+        func toggleDarkMode(_ notification: Notification, isDark: Bool) {
+            NotificationCenter.default.post(
+                name: NSNotification.Name("toggleDarkMode"), object: nil)
+            print("test")
+        }
+
+        func windowWillMove(_ notification: Notification) {
+            dragDebounceTimer?.invalidate()
+            isDragging = true
+            NotificationCenter.default.post(
+                name: NSNotification.Name("windowWillDrag"), object: nil)
+        }
+        func windowDidMove(_ notification: Notification) {}
+        func windowWillStartLiveResize(_ notification: Notification) {
+            dragDebounceTimer?.invalidate()
+            isResizing = true
+            NotificationCenter.default.post(
+                name: NSNotification.Name("windowWillResize"), object: nil)
+        }
+        func windowDidEndLiveResize(_ notification: Notification) {
+            dragDebounceTimer?.invalidate()
+            isResizing = false
+            NotificationCenter.default.post(
+                name: NSNotification.Name("windowDidResize"), object: nil)
+        }
+    }
+    func makeNSView(context: Context) -> some NSView {
+        DispatchQueue.main.async {
+            metalView.window?.delegate = context.coordinator
+        }
+        return metalView
+    }
+    func updateNSView(_ uiView: NSViewType, context: Context) {
+        updateMetalView()
+    }
+#elseif os(iOS)
+    func makeUIView(context: Context) -> MTKView {
+        metalView
+    }
+
+    func updateUIView(_ uiView: MTKView, context: Context) {
+        updateMetalView()
+    }
+#endif
 
     func updateMetalView() {
         gameController?.options = options

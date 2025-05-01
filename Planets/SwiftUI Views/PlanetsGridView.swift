@@ -8,40 +8,41 @@
 import MetalKit
 import SwiftData
 import SwiftUI
+import Glur
 
 struct PlanetsGridView: View {
     @Query var optionsList: [Options]
+    @State private var refreshMiniatures: Bool = false
     let columns = [
         GridItem(.adaptive(minimum: 150)),
         GridItem(.adaptive(minimum: 150)),
     ]
-    @State private var isEditing: Bool = false
-    @State private var isScrolling: Bool = false
-    @State var gameSceneFovRadians: Float?
-    @State private var localImage: NSImage? = nil
-    @State private var localImageHasChanged: Bool = false
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns) {
-                    ForEach(optionsList) { options in
-                        NavigationLink {
-                            MetalView(
-                                isEditing: $isEditing,
-                                isScrolling: $isScrolling
-                            )
-                            .environment(\.options, options)
-                        } label: {
-                            PlanetItemView(options: options, gameSceneFovRadians: $gameSceneFovRadians)
+        NavigationSplitView {
+            // TODO add categories
+        } detail: {
+            NavigationStack {
+                ScrollView {
+                    LazyVGrid(columns: columns) {
+                        ForEach(optionsList) { options in
+                            NavigationLink {
+                                PlanetContentView()
+                                    .environment(\.options, options)
+                                    .onDisappear {
+                                        refreshMiniatures.toggle()
+                                    }
+                            } label: {
+                                PlanetItemView(refreshMiniatures: $refreshMiniatures)
+                                    .environment(\.options, options)
+                            }
+                            .buttonStyle(.borderless)
                         }
-                        .buttonStyle(.borderless)
                     }
+                    .padding()
                 }
-                .padding()
             }
         }
-        .navigationTitle(Text("Planets"))
     }
 }
 
@@ -62,38 +63,35 @@ struct PlanetsGridView_Previews: PreviewProvider {
             .modelContainer(container)
     }
 }
-//.navigationDestination(for: Recipe.self) { recipe in
-//    RecipeDetail(recipe: recipe)
-//}
 
 struct PlanetItemView: View {
-    let options: Options
-    @Binding var gameSceneFovRadians: Float?
+    @Environment(\.options) private var options: Options
+    @Binding var refreshMiniatures: Bool
+
+    @State var gameSceneFovRadians: Float?
     @State private var image: NSImage?
 
     var body: some View {
         Group {
             if let image = image {
-                ZStack {
-                    Image(nsImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(.rect(cornerRadius: 16.0))
-                    VStack {
-                        Spacer()
+                Image(nsImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .clipShape(.rect(cornerRadius: 16.0))
+                    .glur(radius: 8.0, offset: 0.7, interpolation: 0.2, direction: .down)
+                    .clipShape(
+                        .rect(
+                            cornerRadii: RectangleCornerRadii(
+                                bottomLeading: 16.0, bottomTrailing: 16.0
+                            )
+                        )
+                    )
+                    .overlay(alignment: .bottomLeading) {
                         Text("\(options.name)")
-                            .frame(maxWidth: .infinity)
-                            .font(.title2)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
                             .padding()
-                            .background(.thinMaterial, in: .rect(
-                                cornerRadii: RectangleCornerRadii(
-                                    bottomLeading: 16.0,
-                                    bottomTrailing: 16.0
-                                )
-                            ))
-                            .foregroundStyle(.black)
                     }
-                }
             } else {
                 RoundedRectangle(cornerRadius: 16.0)
                     .fill(Color.gray.opacity(0.3))
@@ -102,7 +100,13 @@ struct PlanetItemView: View {
             }
         }
         .onAppear {
+            Task {
+                renderPlanet()
+            }
+        }
+        .onChange(of: refreshMiniatures) {
             renderPlanet()
+            refreshMiniatures = false
         }
     }
 

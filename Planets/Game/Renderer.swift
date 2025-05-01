@@ -41,7 +41,11 @@ class Renderer: NSObject {
 
     var pipelineState: MTLRenderPipelineState!
     let depthStencilState: MTLDepthStencilState?
-    let metalClearColor = MTLClearColor(red: 0.93, green: 0.97, blue: 1.0, alpha: 1.0)
+
+    static var redColor = 1.0
+    static var greenColor = 0.97
+    static var blueColor = 0.93
+    let metalClearColor = MTLClearColor(red: redColor, green: greenColor, blue: blueColor, alpha: 1.0)
 
     var uniforms = Uniforms()
     var params = Params()
@@ -80,7 +84,7 @@ class Renderer: NSObject {
         pipelineDescriptor.vertexFunction = vertexFunction
         pipelineDescriptor.fragmentFunction = fragmentFunction
         pipelineDescriptor.colorAttachments[0].pixelFormat =
-            metalView.colorPixelFormat
+            .rgba8Unorm
         pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         pipelineDescriptor.vertexDescriptor =
             MTLVertexDescriptor.defaultLayout
@@ -93,6 +97,7 @@ class Renderer: NSObject {
         depthStencilState = Renderer.buildDepthStencilState()
         super.init()
         metalView.clearColor = self.metalClearColor
+        metalView.colorPixelFormat = .rgba8Unorm
         metalView.depthStencilPixelFormat = .depth32Float
         mtkView(
             metalView,
@@ -215,7 +220,8 @@ extension Renderer {
         renderPassDescriptor.colorAttachments[0].texture = renderTargetTexture
         renderPassDescriptor.colorAttachments[0].loadAction = .clear
         renderPassDescriptor.colorAttachments[0].storeAction = .store
-        renderPassDescriptor.colorAttachments[0].clearColor = self.metalClearColor
+        renderPassDescriptor
+            .colorAttachments[0].clearColor = self.metalClearColor
         renderPassDescriptor.depthAttachment.texture = depthTexture
         renderPassDescriptor.depthAttachment.loadAction = .clear
         renderPassDescriptor.depthAttachment.storeAction = .store

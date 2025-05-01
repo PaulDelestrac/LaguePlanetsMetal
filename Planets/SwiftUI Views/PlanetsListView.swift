@@ -46,7 +46,7 @@ struct PlanetsListView: View {
                 isFocused = true
             }
         }
-        .navigationTitle(navigationContext.sideBarTitle)
+        //.navigationTitle(navigationContext.sideBarTitle)
         /*.onChange(of: selectedOptionsID) { _, newSelectedOptionsID in
             handleSelectedOptionsChange(newSelectedOptionsID)
         }*/

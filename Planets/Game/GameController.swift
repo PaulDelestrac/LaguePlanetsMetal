@@ -90,7 +90,6 @@ class GameController: NSObject {
     @objc func windowWillDrag() {
         self.isWindowDragging = true
     }
-
     @objc func windowDidDrag() {
         self.isWindowDragging = false
     }
